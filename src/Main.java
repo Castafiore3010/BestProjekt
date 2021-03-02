@@ -1,9 +1,5 @@
-import java.lang.reflect.Array;
-import java.text.DateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Scanner;
 
 public class Main {
@@ -39,7 +35,7 @@ public class Main {
 
             switch (choice) {
 
-                case 1:
+                case 1: // Connect to db
                     boolean b = jdbcWriter.setConnection();
                     menu.setMenuItems(new String[]{"Cars", "Customers", "Rentals"});
                     menu.setExitNumber(menu.getExitNumber() - 1);
@@ -51,7 +47,7 @@ public class Main {
                         System.out.println("No connection made\n");
                     break;
 
-                case 2:
+                case 2: // Cars submenu
                     while (subMenuRun) {
                         MainMenu subMenuCars = new MainMenu("Cars -- Exit returns to main menu", subMenuItems,
                                 "Enter menu number");
@@ -60,21 +56,22 @@ public class Main {
 
 
                         switch (subMenuChoice) {
-                            case 1:
+                            case 1: // Insert car
                                 scanner.nextLine();
                                 Car newCar;
                                 newCar = createCar();
                                 jdbcWriter.writeLines(newCar);
                                 break;
-                            case 2:
+                            case 2: //Delete car
                                 System.out.println("Please enter ID number of car you wish to delete: ");
                                 int deleteChoice = readChoiceInt();
-                                jdbcWriter.delete(deleteChoice);
+                                jdbcWriter.deleteCar(deleteChoice);
+                                System.out.println("Successfully deleted the car with car_id: " +deleteChoice);
                                 break;
-                            case 3:
+                            case 3: //Update car
                                 updateCar();
                                 break;
-                            case 4:
+                            case 4: //View all cars
                                 displayList(cars);
                                 break;
                             case 5:
@@ -88,6 +85,48 @@ public class Main {
                         }
                     }
                     break;
+                case 3: // Customers submenu
+                    MainMenu subMenuCustomers = new MainMenu("Customers -- Exit returns to main menu",
+                            subMenuItems,"Enter menu number");
+                    subMenuCustomers.displayMenu();
+                    subMenuChoice = subMenuCustomers.readMenuChoice();
+
+
+                    switch (subMenuChoice) {
+                        case 1: // Insert customer
+                            Customer customer=new Customer();
+                            customer = createCustomer();
+                            jdbcWriter.insertCustomer(customer);
+                            break;
+                        case 2: //Delete customer
+                            System.out.println("Please enter ID number of customer you wish to delete: ");
+                            System.out.println("Enter first name of customer");
+                            String fname = readChoiceString();
+                            System.out.println("Enter last name of customer");
+                            String lname = readChoiceString();
+                            int id = jdbcWriter.getCustomerIdFromDB(fname,lname);
+                            jdbcWriter.deleteCustomer(id);
+                            System.out.println("Successfully deleted the customer with customer id: "+id+
+                                    "\nand the name: "+fname+" "+lname);
+                            break;
+                        case 3: //Update customer
+                            updateCar();
+                            break;
+                        case 4: //View all cars
+                            displayList(cars);
+                            break;
+                        case 5:
+                            subMenuRun = false;
+                            break;
+
+                    }
+                    if (subMenuChoice != 5) {
+                        System.out.print("\nEnter r to return: ");
+                        scanner.next();
+                    }
+
+                    break;
+
                 case 5:
                     System.out.println("Thank you for using kailua database management app");
                     run = false;
@@ -229,6 +268,7 @@ public class Main {
         }
     }
 
+/*
     public int getCarIndexById(int id) {
         int carId;
         int indexOfCar = -1;
@@ -245,6 +285,136 @@ public class Main {
             }
 
         return indexOfCar;
+    }
+
+ */ // Gammel metode
+
+    public Customer createCustomer() {
+        Customer customer;
+        String first_name;
+        String last_name;
+        String email;
+        int address_id;
+        String address_name;
+        int zipcode_id;
+        int city_id;
+        String city_name;
+
+        //Contact
+        System.out.println("Enter first name: ");
+        first_name = readChoiceString();
+        System.out.println("Enter last name: ");
+        last_name = readChoiceString();
+        System.out.println("Enter email: ");
+        email = readChoiceString();
+
+        //Address
+        System.out.println("Enter address_name: ");
+        address_name = readChoiceString();
+        System.out.println("Enter zipcode id: ");
+        zipcode_id = readChoiceInt();
+        System.out.println("Enter city name: ");
+        scanner.nextLine();
+        city_name = readChoiceString();
+
+
+
+        jdbcWriter.insertCity(city_name);
+        if (!jdbcWriter.zipCodeExists(zipcode_id)){
+            jdbcWriter.insertZipCode(zipcode_id,city_name);
+        }
+
+        jdbcWriter.insertAddress(address_name,zipcode_id);
+        address_id = jdbcWriter.getAddressIDFromDbByAddressName(address_name);
+        city_id = jdbcWriter.getCityIDFromDbByCityName(city_name);
+        customer = new Customer(first_name,last_name,email,address_id,address_name,zipcode_id,city_id,city_name);
+
+        return customer;
+    }
+
+    public void updateCustomer() {
+        System.out.println("Please enter ID of the customer you wish to update");
+        int customer_id = readChoiceInt();
+        Customer customer = jdbcWriter.getCustomerFromDBbyId(customer_id);
+
+
+        String[] customerItems = new String[7];
+
+        customerItems[0] = customer.getFirst_name() + ": current first name";
+        customerItems[1] = customer.getLast_name() + ": current last name";
+        customerItems[2] = customer.getEmail() + ": current email";
+        customerItems[3] = customer.getAddress_name() + ": current address name";
+        customerItems[4] = ""+customer.getZipcode_id() + ": current zipcode id";
+        customerItems[5] = customer.getCity_name() + ": current city name";
+
+
+        MainMenu updateCustomerMenu = new MainMenu("Update Customer Menu", customerItems, "Enter menu number");
+
+        boolean run = true;
+
+
+        while (run) {
+
+            updateCarMenu.displayMenu();
+            int carMenuChoice = readChoiceInt();
+            scanner.nextLine();
+
+
+            switch (carMenuChoice) {
+                case 1:
+                    System.out.println("Enter new desired model name: ");
+                    String newModelName = readChoiceString();
+                    car.setModel_name(newModelName);
+                    carItems[0] = car.getModel_name() + ": current model_name";
+                    break;
+                case 2:
+                    System.out.println("Enter new registration number: ");
+                    String newRegNr = readChoiceString();
+                    car.setRegistration_number(newRegNr);
+                    carItems[1] = car.getRegistration_number() + ": current reg_nr";
+                    break;
+                case 3:
+                    System.out.println("Enter new first registration date: ");
+                    LocalDate firstRegDate = LocalDate.parse(readChoiceString());
+                    car.setFirst_registration(firstRegDate);
+                    carItems[2] = String.valueOf(firstRegDate + ": current regDate");
+                    break;
+                case 4:
+                    System.out.println("Enter new odometer reading: ");
+                    double odometer = readChoiceDouble();
+                    car.setOdometer(odometer);
+                    carItems[3] = String.valueOf(car.getOdometer() + ": current odometer reading");
+                    break;
+                case 5:
+                    System.out.println("Enter new car group: ");
+                    int newCarGrpId = readChoiceInt();
+                    car.setCar_group_id(newCarGrpId);
+                    carItems[4] = String.valueOf(car.getCar_group_id() + ": current car_grp_id");
+                    break;
+
+                case 6:
+                    System.out.println("Enter new brand id: ");
+                    int newBrandId = readChoiceInt();
+                    car.setBrand_id(newBrandId);
+                    carItems[5] = String.valueOf(car.getBrand_id() + ": current brand_id");
+                    break;
+
+                case 7:
+                    System.out.println("Enter new fuelType id: ");
+                    int newFuelTypeId = readChoiceInt();
+                    car.setFuelType_id(newFuelTypeId);
+                    carItems[6] = String.valueOf(car.getFuelType_id() + ": current fuelType_id");
+                    break;
+
+                case 8:
+                    run = false;
+                    break;
+
+
+            }
+        }
+        jdbcWriter.updateCar(car_id, car);
+
     }
 
     public void updateCar() {
@@ -279,40 +449,45 @@ public class Main {
                     System.out.println("Enter new desired model name: ");
                     String newModelName = readChoiceString();
                     car.setModel_name(newModelName);
+                    carItems[0] = car.getModel_name() + ": current model_name";
                     break;
                 case 2:
                     System.out.println("Enter new registration number: ");
                     String newRegNr = readChoiceString();
                     car.setRegistration_number(newRegNr);
+                    carItems[1] = car.getRegistration_number() + ": current reg_nr";
                     break;
                 case 3:
                     System.out.println("Enter new first registration date: ");
                     LocalDate firstRegDate = LocalDate.parse(readChoiceString());
                     car.setFirst_registration(firstRegDate);
                     carItems[2] = String.valueOf(firstRegDate + ": current regDate");
-
                     break;
                 case 4:
                     System.out.println("Enter new odometer reading: ");
                     double odometer = readChoiceDouble();
                     car.setOdometer(odometer);
+                    carItems[3] = String.valueOf(car.getOdometer() + ": current odometer reading");
                     break;
                 case 5:
                     System.out.println("Enter new car group: ");
                     int newCarGrpId = readChoiceInt();
                     car.setCar_group_id(newCarGrpId);
+                    carItems[4] = String.valueOf(car.getCar_group_id() + ": current car_grp_id");
                     break;
 
                 case 6:
                     System.out.println("Enter new brand id: ");
                     int newBrandId = readChoiceInt();
                     car.setBrand_id(newBrandId);
+                    carItems[5] = String.valueOf(car.getBrand_id() + ": current brand_id");
                     break;
 
                 case 7:
                     System.out.println("Enter new fuelType id: ");
                     int newFuelTypeId = readChoiceInt();
                     car.setFuelType_id(newFuelTypeId);
+                    carItems[6] = String.valueOf(car.getFuelType_id() + ": current fuelType_id");
                     break;
 
                 case 8:
