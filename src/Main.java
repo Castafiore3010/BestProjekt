@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-    private static Scanner scanner = new Scanner(System.in);
+    public static Scanner scanner = new Scanner(System.in);
     private static JDBCWriter jdbcWriter = new JDBCWriter();
     private ArrayList<Car> cars;
 
@@ -164,6 +164,7 @@ public class Main {
             System.out.print("Please enter string: ");
             scanner.next();
         }
+
         userChoice = scanner.nextLine();
 
 
@@ -296,7 +297,9 @@ public class Main {
         String email;
         int address_id;
         String address_name;
+        int zipcode;
         int zipcode_id;
+
         int city_id;
         String city_name;
 
@@ -312,7 +315,7 @@ public class Main {
         System.out.println("Enter address_name: ");
         address_name = readChoiceString();
         System.out.println("Enter zipcode ");
-        zipcode_id = readChoiceInt();
+        zipcode = readChoiceInt();
         System.out.println("Enter city name: ");
         scanner.nextLine();
         city_name = readChoiceString();
@@ -320,14 +323,15 @@ public class Main {
 
 
         jdbcWriter.insertCity(city_name);
-        if (!jdbcWriter.zipCodeExists(zipcode_id)){
-            jdbcWriter.insertZipCode(zipcode_id,city_name);
+        if (!jdbcWriter.zipCodeExists(zipcode)){
+            jdbcWriter.insertZipCode(zipcode,city_name);
         }
 
-        jdbcWriter.insertAddress(address_name,zipcode_id);
+        jdbcWriter.insertAddress(address_name,zipcode);
         address_id = jdbcWriter.getAddressIDFromDbByAddressName(address_name);
         city_id = jdbcWriter.getCityIDFromDbByCityName(city_name);
-        customer = new Customer(first_name,last_name,email,address_id,address_name,zipcode_id,city_id,city_name);
+        zipcode_id = jdbcWriter.getZipcodeIdFromDbByAddressId(address_id);
+        customer = new Customer(first_name,last_name,email,address_id,address_name,zipcode, zipcode_id,city_id,city_name);
 
         return customer;
     }
@@ -336,6 +340,7 @@ public class Main {
         System.out.println("Please enter ID of the customer you wish to update");
         int customer_id = readChoiceInt();
         Customer customer = jdbcWriter.getCustomerFromDBbyId(customer_id);
+        Customer oldCustomerCopy = jdbcWriter.getCustomerFromDBbyId(customer_id);
 
 
         String[] customerItems = new String[6];
@@ -395,16 +400,17 @@ public class Main {
                     System.out.println("Enter new city name: ");
                     String newCityName = readChoiceString();
                     customer.setCity_name(newCityName);
-                    customerItems[5] = customer.getCity_name() + ": current brand_id";
+                    customerItems[5] = customer.getCity_name() + ": current city_name";
                     break;
-                default:
+                case 7:
+                    jdbcWriter.updateCustomer(customer_id, oldCustomerCopy, customer);
                     run = false;
+                    break;
 
-                    //No break lol
+
 
             }
-            System.out.println("SE MIG SE MIG"+customer_id);
-            jdbcWriter.updateCustomer(customer_id,customer);
+
         }
 
     }

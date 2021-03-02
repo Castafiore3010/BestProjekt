@@ -9,11 +9,23 @@ public class Customer {
     private String address_name;
 
     private int zipcode;
+
+
+
+    private int zipcode_id;
     private int city_id;
 
     private String city_name;
 
     // _____________________
+
+    public int getZipcode_id() {
+        return zipcode_id;
+    }
+
+    public void setZipcode_id(int zipcode_id) {
+        this.zipcode_id = zipcode_id;
+    }
 
     public int getCustomer_id() {
         return customer_id;
@@ -92,14 +104,14 @@ public class Customer {
     }
 
 
-    public Customer(String first_name, String last_name, String email, int address_id, String address_name, int zipcode_id, int city_id, String city_name) {
+    public Customer(String first_name, String last_name, String email, int address_id, String address_name, int zipcode,int zipcode_id, int city_id, String city_name) {
 
         this.first_name = first_name;
         this.last_name = last_name;
         this.email = email;
         this.address_id = address_id;
         this.address_name = address_name;
-        this.zipcode = zipcode_id;
+        this.zipcode = zipcode;
         this.city_id = city_id;
         this.city_name = city_name;
     }

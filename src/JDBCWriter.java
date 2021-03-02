@@ -11,7 +11,7 @@ public class JDBCWriter {
         boolean bres = false;
 
         try {
-            connection = DriverManager.getConnection(url, "root", "fisse123");
+            connection = DriverManager.getConnection(url, "Marc", "wilma");
             bres = true;
         } catch (SQLException error) {
             System.out.println("\nNo connection made");
@@ -42,11 +42,11 @@ public class JDBCWriter {
         try {
             preparedStatement = connection.prepareStatement(updateStr);
             preparedStatement.setString(1, model_name);
-            preparedStatement.setString(2,registration_number);
-            preparedStatement.setString(3,first_registration.toString());
-            preparedStatement.setDouble(4,odometer);
-            preparedStatement.setInt(5,car_group_id);
-            preparedStatement.setInt(6,brand_id);
+            preparedStatement.setString(2, registration_number);
+            preparedStatement.setString(3, first_registration.toString());
+            preparedStatement.setDouble(4, odometer);
+            preparedStatement.setInt(5, car_group_id);
+            preparedStatement.setInt(6, brand_id);
             preparedStatement.setInt(7, fuelType_id);
             preparedStatement.setInt(8, carId);
             result = preparedStatement.executeUpdate();
@@ -78,7 +78,7 @@ public class JDBCWriter {
                 String model_name = "" + resultSet.getObject("model_name");
                 String registration_number = "" + resultSet.getObject("registration_number");
                 LocalDate first_registration = LocalDate.parse("" + resultSet.getObject("first_registration"));
-                String odometer =  "" + resultSet.getObject("odometer");
+                String odometer = "" + resultSet.getObject("odometer");
                 Double odometer2 = Double.parseDouble(odometer);
                 int car_group_id = (int) resultSet.getObject("car_group_id");
                 int brand_id = (int) resultSet.getObject("brand_id");
@@ -109,7 +109,6 @@ public class JDBCWriter {
         String searchStr = "SELECT * from cars where car_id = ?";
 
 
-
         try {
             preparedStatement = connection.prepareStatement(searchStr);
             preparedStatement.setInt(1, id);
@@ -122,7 +121,7 @@ public class JDBCWriter {
                 String model_name = "" + resultSet.getObject("model_name");
                 String registration_number = "" + resultSet.getObject("registration_number");
                 LocalDate first_registration = LocalDate.parse("" + resultSet.getObject("first_registration"));
-                String odometer =  "" + resultSet.getObject("odometer");
+                String odometer = "" + resultSet.getObject("odometer");
                 Double odometer2 = Double.parseDouble(odometer);
                 int car_group_id = (int) resultSet.getObject("car_group_id");
                 int brand_id = (int) resultSet.getObject("brand_id");
@@ -136,7 +135,6 @@ public class JDBCWriter {
                 cars.add(car);
 
 
-
             }
 
         } catch (SQLException error) {
@@ -144,9 +142,7 @@ public class JDBCWriter {
         }
 
 
-
         return cars.get(0);
-
 
 
     }
@@ -179,7 +175,7 @@ public class JDBCWriter {
 
         try {
             preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setInt(1,index);
+            preparedStatement.setInt(1, index);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -189,13 +185,13 @@ public class JDBCWriter {
                 String model_name = "" + resultSet.getObject("model_name");
                 String registration_number = "" + resultSet.getObject("registration_number");
                 LocalDate first_registration = LocalDate.parse("" + resultSet.getObject("first_registration"));
-                String odometer =  "" + resultSet.getObject("odometer");
+                String odometer = "" + resultSet.getObject("odometer");
                 Double odometer2 = Double.parseDouble(odometer);
                 int car_group_id = (int) resultSet.getObject("car_group_id");
                 int brand_id = (int) resultSet.getObject("brand_id");
                 int fuelType_id = (int) resultSet.getObject("fueltype_id");
 
-                 Car car = new Car(model_name, registration_number, first_registration, odometer2, car_group_id,
+                Car car = new Car(model_name, registration_number, first_registration, odometer2, car_group_id,
                         brand_id, fuelType_id);
 
                 car.setCar_id(help);
@@ -213,7 +209,6 @@ public class JDBCWriter {
         tempCar = cars.get(length - 1);
 
         return tempCar;
-
 
 
     }
@@ -242,7 +237,6 @@ public class JDBCWriter {
 
 
     }
-
 
 
     public String getBrandNameFromDB(int id) {
@@ -278,7 +272,7 @@ public class JDBCWriter {
 
         try {
             preparedStatement = connection.prepareStatement(deleteString);
-            preparedStatement.setInt(1,id);
+            preparedStatement.setInt(1, id);
             result = preparedStatement.executeUpdate();
 
         } catch (SQLException error) {
@@ -339,7 +333,6 @@ public class JDBCWriter {
     }
 
 
-
     // ---------------------------------------------------
     // ---------------------------------------------------
     // ---------------------------------------------------
@@ -396,7 +389,7 @@ public class JDBCWriter {
 
     }
 
-    public boolean zipCodeExists(int zipcode){
+    public boolean zipCodeExists(int zipcode) {
         boolean exists = false;
 
 
@@ -422,7 +415,7 @@ public class JDBCWriter {
         return exists;
     }
 
-    public boolean cityExists(String city_name){
+    public boolean cityExists(String city_name) {
         boolean exists = false;
 
 
@@ -447,7 +440,8 @@ public class JDBCWriter {
 
         return exists;
     }
-    public boolean addressExists(int address_id){
+
+    public boolean addressExists(int address_id) {
         boolean exists = false;
 
 
@@ -473,12 +467,12 @@ public class JDBCWriter {
         return exists;
     }
 
-    public int insertZipCode(int zipcode,String city_name) throws NullPointerException {
+    public int insertZipCode(int zipcode, String city_name) throws NullPointerException {
         int result = 0;
 
 
         String insstr = "INSERT INTO zipcodes(zipcode,city_id) " +
-                "VALUES ('" + zipcode +"','" + getCityIDFromDbByCityName(city_name) + "')";
+                "VALUES ('" + zipcode + "','" + getCityIDFromDbByCityName(city_name) + "')";
 
         PreparedStatement preparedStatement;
 
@@ -499,10 +493,10 @@ public class JDBCWriter {
         return result;
     }
 
-    public int insertAddress(String address_name,int zipcode_id) throws NullPointerException {
+    public int insertAddress(String address_name, int zipcode_id) throws NullPointerException {
 
         String insstr = "INSERT INTO addresses(address_name,zipcode_id) " +
-                "VALUES ('" + address_name +"','" + zipcode_id + "')";
+                "VALUES ('" + address_name + "','" + zipcode_id + "')";
 
         PreparedStatement preparedStatement;
         int result = 0;
@@ -569,6 +563,34 @@ public class JDBCWriter {
         return result;
 
     }
+
+    public int getZipcodeIdFromDbByAddressId(int address_id) {
+
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT zipcode_id from zipcodes " +
+                "join addresses using(zipcode_id) " +
+                "where address_id = ?";
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, address_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+
+                result = resultSet.getInt(1);
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
+
+    }
+
+
     public int getZipcodeIdFromDbByCustomer(int customer_id) {
 
         PreparedStatement preparedStatement;
@@ -604,7 +626,7 @@ public class JDBCWriter {
                 "join addresses using (zipcode_id) " +
                 "join customers using (address_id) " +
                 "where customer_id = ?";
-        String result ="";
+        String result = "";
 
         try {
             preparedStatement = connection.prepareStatement(searchStr);
@@ -630,7 +652,7 @@ public class JDBCWriter {
         String searchStr = "SELECT address_name from addresses " +
                 "join customers using(address_id) " +
                 "where customer_id = ?";
-        String result ="";
+        String result = "";
 
         try {
             preparedStatement = connection.prepareStatement(searchStr);
@@ -676,7 +698,7 @@ public class JDBCWriter {
                 String address_name = getAddressNameFromDbByCustomerId(id);
 
 
-                Customer customer1 = new Customer(first_name,last_name,email,address_id,address_name,zipcode,city_id,city_name);
+                Customer customer1 = new Customer(first_name, last_name, email, address_id, address_name, zipcode, zipcode_id, city_id, city_name);
                 customer1.setCustomer_id(tempCustomer_id);
                 customerList.add(customer1);
 
@@ -686,7 +708,8 @@ public class JDBCWriter {
             error.printStackTrace();
         }
 
-    return customerList.get(0);
+        return customerList.get(0);
+
     }
 
     public int deleteCustomer(int id) {
@@ -696,7 +719,7 @@ public class JDBCWriter {
 
         try {
             preparedStatement = connection.prepareStatement(deleteString);
-            preparedStatement.setInt(1,id);
+            preparedStatement.setInt(1, id);
             result = preparedStatement.executeUpdate();
 
         } catch (SQLException error) {
@@ -705,7 +728,7 @@ public class JDBCWriter {
         return result;
     }
 
-    public int getCustomerIdFromDB(String first_name,String last_name) {
+    public int getCustomerIdFromDB(String first_name, String last_name) {
 
         PreparedStatement preparedStatement;
         String searchStr = "SELECT customer_id from customers where first_name = ? and last_name = ?";
@@ -729,6 +752,7 @@ public class JDBCWriter {
         return result;
 
     }
+
     public int getZipcodeFromDbByCustomerId(int customer_id) {
 
         PreparedStatement preparedStatement;
@@ -757,19 +781,94 @@ public class JDBCWriter {
 
     }
 
-    public int updateCustomer(int customer_id, Customer customer) {
+    public int updateCity(String city_name, int city_id) {
+        String updateCity = "UPDATE cities SET city_name = ? where city_id = ?";
 
-        int tempZip = customer.getZipcode();
-        String first_name = customer.getFirst_name();
-        String last_name = customer.getLast_name();
-        String email = customer.getEmail();
+        PreparedStatement preparedStatement;
+        int result = -1;
 
-        int city_id = customer.getCity_id();
-        String city_name = customer.getCity_name();
+        try {
+            preparedStatement = connection.prepareStatement(updateCity);
+            preparedStatement.setString(1, city_name);
+            preparedStatement.setInt(2, city_id);
+            result = preparedStatement.executeUpdate();
 
-        int zipcode = customer.getZipcode();
-        int address_id = customer.getAddress_id();
-        String address_name = customer.getAddress_name();
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+        return result;
+    }
+
+    public int updateZipcode(int zip_code, int zip_code_id) {
+
+        String updateZipcode = "UPDATE zipcodes SET zipcode = ? WHERE zipcode_id = ?";
+
+        PreparedStatement preparedStatement;
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(updateZipcode);
+            preparedStatement.setInt(1, zip_code);
+            preparedStatement.setInt(2, zip_code_id);
+            result = preparedStatement.executeUpdate();
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+        return result;
+    }
+
+    public int updateAddressName(String newName, int address_id) {
+
+        String updateAddressNameStr = "UPDATE addresses SET address_name = ? WHERE address_id = ?";
+
+        PreparedStatement preparedStatement;
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(updateAddressNameStr);
+            preparedStatement.setString(1, newName);
+            preparedStatement.setInt(2, address_id);
+            result = preparedStatement.executeUpdate();
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+        return result;
+    }
+
+
+    public int updateCustomer(int customer_id, Customer beforeChanges, Customer targetChanges) {
+
+        Main reader = new Main();
+
+
+        String first_name_old = beforeChanges.getFirst_name();
+        String first_name_new = targetChanges.getFirst_name();
+
+        String last_name_old = beforeChanges.getLast_name();
+        String last_name_new = targetChanges.getLast_name();
+
+        String email_old = beforeChanges.getEmail();
+        String email_new = targetChanges.getEmail();
+
+        int city_id_old = beforeChanges.getCity_id();
+        int city_id_new = targetChanges.getCity_id();
+
+        String city_name_old = beforeChanges.getCity_name();
+        String city_name_new = targetChanges.getCity_name();
+
+        int zipcode_old = beforeChanges.getZipcode();
+        int zipcode_new = targetChanges.getZipcode();
+
+        int zipcode_id_old = beforeChanges.getZipcode_id();
+        int zipcode_id_new = targetChanges.getZipcode_id();
+
+        int address_id_old = beforeChanges.getAddress_id();
+        int address_id_new = targetChanges.getAddress_id();
+
+        String address_name_old = beforeChanges.getAddress_name();
+        String address_name_new = targetChanges.getAddress_name();
 
 
         PreparedStatement preparedStatement;
@@ -778,57 +877,243 @@ public class JDBCWriter {
 
         int result = -1;
 
-        String updateCity = "UPDATE cities SET city_name = ? WHERE customer_id = ?";
-        String updateZipcode = "UPDATE zipcodes SET zipcode = ? WHERE customer_id = ?";
+
+        String updateCity = "UPDATE cities SET city_name = ? where city_id = ?";
+        String updateZipcode = "UPDATE zipcodes SET zipcode = ? WHERE zipcode_id = ?";
         String updateAddress = "UPDATE addresses SET address_name = ? WHERE customer_id = ?";
 
 
-        if(cityExists(city_name)) {
-            System.out.println("Første værdi af Cityexists: " + city_name +" "+ city_id);
-            insertCity(city_name);
-            city_id = getCityIDFromDbByCityName(city_name);
-            System.out.println("Ændrer City: " + city_name + "  " + city_id);
+        if (first_name_old.equalsIgnoreCase(first_name_new) && last_name_old.equalsIgnoreCase(last_name_new)
+                && email_old.equalsIgnoreCase(email_new) && address_name_old.equalsIgnoreCase(address_name_new)
+                && zipcode_old == zipcode_new && city_name_old.equalsIgnoreCase(city_name_new)) {
+            System.out.println("No changes made");
+            return result;
         }
 
-        //Kontrollerer at zipcode ikke allerede eksisterer.
-        if (zipCodeExists(zipcode)) {
-            System.out.println(tempZip +" "+ city_name +" "+ city_id +" "+ "Første zip værdi");
-            insertZipCode(zipcode,city_name);
-            zipcode = getZipcodeIdFromDbByCustomer(customer_id);
-            System.out.println("Anden værdi ZIP: "+zipcode + "  " +city_name + "  "+city_id);
+
+        // hvis enten zipcode, city_name eller street_name er blevet opdateret
+        if (zipcode_old != zipcode_new || !city_name_old.equalsIgnoreCase(city_name_new) ||
+                !address_name_old.equalsIgnoreCase(address_name_new)) {
+
+            // tilfælde hvor KUN zipcode er ændret. TESTET!
+
+            if (zipcode_old != zipcode_new && city_name_old.equalsIgnoreCase(city_name_new) &&
+                    address_name_old.equalsIgnoreCase(address_name_new)) {
+                System.out.println("It seems that the Zipcode value has been updated - to avoid confusion in our database" +
+                        " - Please enter the new corresponding City name: ");
+                city_name_new = reader.readChoiceString();
+                int zipCodeID = getZipcodeIdFromDbByAddressId(address_id_old);
+                updateCity(city_name_new, city_id_old);
+                updateZipcode(zipcode_new, zipCodeID);
+                System.out.println("It seems that the Street name value hasn't been updated, however City name and Zipcode has been");
+                System.out.println("Do you wish to enter a new street name? (1 for yes, 0 for no)");
+                int choice = new Main().readChoiceInt();
+
+                if (choice == 1) {
+                    System.out.println("Please enter new street name: ");
+                    reader.readChoiceString();
+                    String newStreetName = reader.readChoiceString();
+                    updateAddressName(newStreetName, address_id_old);
+
+                } else {
+                    updateAddressName(address_name_old, address_id_old);
+                }
+
+            }
+            // tilfælde hvor KUN city name er ændret. TESTET!
+
+            if (!city_name_old.equalsIgnoreCase(city_name_new) && zipcode_old == zipcode_new
+                    && address_name_old.equalsIgnoreCase(address_name_new)) {
+                System.out.println("It seems that the City name value has been updated - to avoid confusion in our database" +
+                        " - Please enter the new corresponding Zipcode: ");
+                zipcode_new = reader.readChoiceInt();
+                int zipCodeID = getZipcodeIdFromDbByAddressId(address_id_old);
+                updateCity(city_name_new, city_id_old);
+                updateZipcode(zipcode_new, zipCodeID);
+                System.out.println("It seems that the Street name value hasn't been updated, however City name and Zipcode has been");
+                System.out.println("Do you wish to enter a new street name? (1 for yes, 0 for no)");
+                int choice = new Main().readChoiceInt();
+
+                if (choice == 1) {
+                    System.out.println("Please enter new street name: ");
+                    reader.readChoiceString();
+                    String newStreetName = reader.readChoiceString();
+                    updateAddressName(newStreetName, address_id_old);
+
+                } else {
+                    updateAddressName(address_name_old, address_id_old);
+                }
+
+            }
+
+
+            /// tilfælde hvor KUN address name er ændret. TESTET!
+            if (zipcode_old == zipcode_new && city_name_old.equalsIgnoreCase(city_name_new) &&
+                    !address_name_old.equalsIgnoreCase(address_name_new)) {
+                System.out.println("It seems that the Street name value has been updated, however City name and Zipcode hasn't been");
+                System.out.println("Do you wish to enter a new city name? (1 for yes, 0 for no)");
+                int choice1 = reader.readChoiceInt();
+                if (choice1 == 1) {
+                    System.out.println("Please enter new city name: ");
+                    reader.readChoiceString();
+                    String newCityName = reader.readChoiceString();
+                    updateCity(newCityName, address_id_old);
+
+                    System.out.println("Do you wish to enter a new zipcode too? (1 for yes, 0 for no)");
+                    int choice2 = reader.readChoiceInt();
+
+                    if (choice2 == 1) {
+                        System.out.println("Please enter new zipcode: ");
+                        int newZipCode = reader.readChoiceInt();
+                        int zipCodeID = getZipcodeIdFromDbByAddressId(address_id_old);
+                        updateZipcode(newZipCode, zipCodeID);
+
+                    } else {
+                        int zipCodeID = getZipcodeIdFromDbByAddressId(address_id_old);
+                        updateZipcode(zipcode_old, zipCodeID);
+                    }
+
+                } else {
+                    System.out.println("Do you wish to enter a new zipcode then? (1 for yes, 0 for no)");
+                    int choice3 = reader.readChoiceInt();
+                    if (choice3 == 1) {
+                        System.out.println("Please enter new zipcode: ");
+                        int newZipCode = reader.readChoiceInt();
+                        int zipCodeID = getZipcodeIdFromDbByAddressId(address_id_old);
+                        updateZipcode(newZipCode, zipCodeID);
+                    } else {
+                        int zipCodeID = getZipcodeIdFromDbByAddressId(address_id_old);
+                        updateZipcode(zipcode_old, zipCodeID);
+                    }
+                }
+                updateAddressName(address_name_new, address_id_old);
+            }
+
+            // tilfælde hvor både zipcode og city_name er ændret, men ikke address_name. TESTET!
+            if (zipcode_old != zipcode_new && !city_name_old.equalsIgnoreCase(city_name_new) &&
+                    address_name_old.equalsIgnoreCase(address_name_new)) {
+                System.out.println("It seems that the zipcode and city_name values have been updated," +
+                        "however the street name value has not");
+                System.out.println("Do you wish to enter a new street name? (1 for yes, 0 for no)");
+                int choice = new Main().readChoiceInt();
+                if (choice == 1) {
+                    System.out.println("Please enter new street name: ");
+                    reader.readChoiceString();
+                    String newStreetName = reader.readChoiceString();
+
+                    int zipcodeId = getZipcodeIdFromDbByAddressId(address_id_old);
+                    updateCity(city_name_new, city_id_old);
+                    updateZipcode(zipcode_new, zipcodeId);
+                    updateAddressName(newStreetName, address_id_old);
+
+                } else {
+                    int zipcodeId = getZipcodeIdFromDbByAddressId(address_id_old);
+                    updateCity(city_name_new, city_id_old);
+                    updateZipcode(zipcode_new, zipcodeId);
+                    updateAddressName(address_name_old, address_id_old);
+                }
+            }
+
+
+            // tilfælde hvor zipcode og address_name er ændret, men ikke city_name. TESTET!
+
+            if (zipcode_old != zipcode_new && city_name_old.equalsIgnoreCase(city_name_new) &&
+                    !address_name_old.equalsIgnoreCase(address_name_new)) {
+                System.out.println("It seems that the zipcode and street_name values have been updated," +
+                        "however the city_name value has not");
+                System.out.println("Do you wish to enter a new city name? (1 for yes, 0 for no)");
+                int choice = new Main().readChoiceInt();
+                if (choice == 1) {
+                    System.out.println("Please enter new city name: ");
+                    reader.readChoiceString();
+                    String newCityName = reader.readChoiceString();
+
+                    int zipcodeId = getZipcodeIdFromDbByAddressId(address_id_old);
+                    updateCity(newCityName, city_id_old);
+                    updateZipcode(zipcode_new, zipcodeId);
+                    updateAddressName(address_name_new, address_id_old);
+
+                } else {
+                    int zipcodeId = getZipcodeIdFromDbByAddressId(address_id_old);
+                    updateCity(city_name_old, city_id_old);
+                    updateZipcode(zipcode_new, zipcodeId);
+                    updateAddressName(address_name_new, address_id_old);
+                }
+            }
+
+            // tilfælde hvor city_name og address_name er ændret, men ikke zipcode TESTET
+
+            if (zipcode_old == zipcode_new && !city_name_old.equalsIgnoreCase(city_name_new) &&
+                    !address_name_old.equalsIgnoreCase(address_name_new)) {
+                System.out.println("It seems that the city_name and street_name values have been updated," +
+                        "however the zipcode value has not");
+                System.out.println("Do you wish to enter a new zipcode? (1 for yes, 0 for no)");
+                int choice = new Main().readChoiceInt();
+                if (choice == 1) {
+                    System.out.println("Please enter new zipcode: ");
+                    reader.readChoiceString();
+                    int newZipCode = reader.readChoiceInt();
+
+                    int zipcodeId = getZipcodeIdFromDbByAddressId(address_id_old);
+                    updateCity(city_name_new, city_id_old);
+                    updateZipcode(newZipCode, zipcodeId);
+                    updateAddressName(address_name_new, address_id_old);
+
+                } else {
+                    int zipcodeId = getZipcodeIdFromDbByAddressId(address_id_old);
+                    updateCity(city_name_new, city_id_old);
+                    updateZipcode(zipcode_old, zipcodeId);
+                    updateAddressName(address_name_new, address_id_old);
+                }
+            }
+
+            // tilfælde hvor alle er ændret
+
+            if (zipcode_old != zipcode_new && !city_name_old.equalsIgnoreCase(city_name_new) &&
+                    !address_name_old.equalsIgnoreCase(address_name_new)) {
+
+
+                int zipIDFinal = getZipcodeIdFromDbByAddressId(address_id_old);
+                updateCity(city_name_new, city_id_old);
+                updateZipcode(zipcode_new, zipIDFinal);
+                updateAddressName(address_name_new, address_id_old);
+            }
         }
 
-        if(addressExists(address_id)){
-            System.out.println(address_name +" "+ zipcode +" "+ address_id +" "+ "Første address name");
-            insertAddress(address_name,zipcode);
-            address_id = getAddressIDFromDbByAddressName(address_name);
-            System.out.println("Ændrer addresse: "+" "+ address_id + "  " +address_name);
-        }
 
+
+        // opdatér resterende værdier
         try {
             preparedStatement = connection.prepareStatement(updateStr);
-            preparedStatement.setString(1, first_name);
-            preparedStatement.setString(2, last_name);
-            preparedStatement.setString(3,email);
-            preparedStatement.setInt(4,address_id);
-            preparedStatement.setInt(5,customer_id);
-            result = preparedStatement.executeUpdate();
-
-
-        } catch (SQLException error) {
-            error.printStackTrace();
+            preparedStatement.setString(1, first_name_new);
+            preparedStatement.setString(2, last_name_new);
+            preparedStatement.setString(3, email_new);
+            preparedStatement.setInt(4, address_id_old);
+            preparedStatement.setInt(5, customer_id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException error9000) {
+            error9000.printStackTrace();
         }
 
-    return result;
+
+        System.out.println("Successfully updated customer");
+
+
+
+
+        return result;
+
 
     }
-
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-
 }
+
+
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+
+
