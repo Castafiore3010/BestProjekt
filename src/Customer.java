@@ -1,6 +1,3 @@
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 public class Customer {
 
     private int customer_id;
@@ -11,7 +8,7 @@ public class Customer {
 
     private String address_name;
 
-    private int zipcode_id;
+    private int zipcode;
     private int city_id;
 
     private String city_name;
@@ -66,12 +63,12 @@ public class Customer {
         this.address_name = address_name;
     }
 
-    public int getZipcode_id() {
-        return zipcode_id;
+    public int getZipcode() {
+        return zipcode;
     }
 
-    public void setZipcode_id(int zipcode_id) {
-        this.zipcode_id = zipcode_id;
+    public void setZipcode(int zipcode) {
+        this.zipcode = zipcode;
     }
 
     public int getCity_id() {
@@ -102,7 +99,7 @@ public class Customer {
         this.email = email;
         this.address_id = address_id;
         this.address_name = address_name;
-        this.zipcode_id = zipcode_id;
+        this.zipcode = zipcode_id;
         this.city_id = city_id;
         this.city_name = city_name;
     }

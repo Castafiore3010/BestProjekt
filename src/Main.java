@@ -110,7 +110,7 @@ public class Main {
                                     "\nand the name: "+fname+" "+lname);
                             break;
                         case 3: //Update customer
-                            updateCar();
+                            updateCustomer();
                             break;
                         case 4: //View all cars
                             displayList(cars);
@@ -311,7 +311,7 @@ public class Main {
         //Address
         System.out.println("Enter address_name: ");
         address_name = readChoiceString();
-        System.out.println("Enter zipcode id: ");
+        System.out.println("Enter zipcode ");
         zipcode_id = readChoiceInt();
         System.out.println("Enter city name: ");
         scanner.nextLine();
@@ -338,13 +338,13 @@ public class Main {
         Customer customer = jdbcWriter.getCustomerFromDBbyId(customer_id);
 
 
-        String[] customerItems = new String[7];
+        String[] customerItems = new String[6];
 
         customerItems[0] = customer.getFirst_name() + ": current first name";
         customerItems[1] = customer.getLast_name() + ": current last name";
         customerItems[2] = customer.getEmail() + ": current email";
         customerItems[3] = customer.getAddress_name() + ": current address name";
-        customerItems[4] = ""+customer.getZipcode_id() + ": current zipcode id";
+        customerItems[4] = ""+customer.getZipcode() + ": current zipcode";
         customerItems[5] = customer.getCity_name() + ": current city name";
 
 
@@ -355,65 +355,57 @@ public class Main {
 
         while (run) {
 
-            updateCarMenu.displayMenu();
-            int carMenuChoice = readChoiceInt();
+            updateCustomerMenu.displayMenu();
+            int customerMenuChoice = readChoiceInt();
             scanner.nextLine();
 
 
-            switch (carMenuChoice) {
+            switch (customerMenuChoice) {
                 case 1:
-                    System.out.println("Enter new desired model name: ");
-                    String newModelName = readChoiceString();
-                    car.setModel_name(newModelName);
-                    carItems[0] = car.getModel_name() + ": current model_name";
+                    System.out.println("Enter new desired first name: ");
+                    String newFirstName = readChoiceString();
+                    customer.setFirst_name(newFirstName);
+                    customerItems[0] = customer.getFirst_name() + ": current first name";
                     break;
                 case 2:
-                    System.out.println("Enter new registration number: ");
-                    String newRegNr = readChoiceString();
-                    car.setRegistration_number(newRegNr);
-                    carItems[1] = car.getRegistration_number() + ": current reg_nr";
+                    System.out.println("Enter new last name: ");
+                    String newLastName = readChoiceString();
+                    customer.setLast_name(newLastName);
+                    customerItems[1] = customer.getLast_name() + ": current last name";
                     break;
                 case 3:
-                    System.out.println("Enter new first registration date: ");
-                    LocalDate firstRegDate = LocalDate.parse(readChoiceString());
-                    car.setFirst_registration(firstRegDate);
-                    carItems[2] = String.valueOf(firstRegDate + ": current regDate");
+                    System.out.println("Enter new email: ");
+                    String newEmail = readChoiceString();
+                    customer.setEmail(newEmail);
+                    customerItems[2] = customer.getEmail() + ": current email";
                     break;
                 case 4:
-                    System.out.println("Enter new odometer reading: ");
-                    double odometer = readChoiceDouble();
-                    car.setOdometer(odometer);
-                    carItems[3] = String.valueOf(car.getOdometer() + ": current odometer reading");
+                    System.out.println("Enter new street address: ");
+                    String newAddress = readChoiceString();
+                    customer.setAddress_name(newAddress);
+                    customerItems[3] = customer.getAddress_name() + ": current address";
                     break;
                 case 5:
-                    System.out.println("Enter new car group: ");
-                    int newCarGrpId = readChoiceInt();
-                    car.setCar_group_id(newCarGrpId);
-                    carItems[4] = String.valueOf(car.getCar_group_id() + ": current car_grp_id");
+                    System.out.println("Enter new zipcode: ");
+                    int newZipCode = readChoiceInt();
+                    customer.setZipcode(newZipCode);
+                    customerItems[4] = customer.getZipcode() + ": current zipcode";
                     break;
-
                 case 6:
-                    System.out.println("Enter new brand id: ");
-                    int newBrandId = readChoiceInt();
-                    car.setBrand_id(newBrandId);
-                    carItems[5] = String.valueOf(car.getBrand_id() + ": current brand_id");
+                    System.out.println("Enter new city name: ");
+                    String newCityName = readChoiceString();
+                    customer.setCity_name(newCityName);
+                    customerItems[5] = customer.getCity_name() + ": current brand_id";
                     break;
-
-                case 7:
-                    System.out.println("Enter new fuelType id: ");
-                    int newFuelTypeId = readChoiceInt();
-                    car.setFuelType_id(newFuelTypeId);
-                    carItems[6] = String.valueOf(car.getFuelType_id() + ": current fuelType_id");
-                    break;
-
-                case 8:
+                default:
                     run = false;
-                    break;
 
+                    //No break lol
 
             }
+            System.out.println("SE MIG SE MIG"+customer_id);
+            jdbcWriter.updateCustomer(customer_id,customer);
         }
-        jdbcWriter.updateCar(car_id, car);
 
     }
 

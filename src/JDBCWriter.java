@@ -1,7 +1,6 @@
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class JDBCWriter {
     private static Connection connection = null;
@@ -330,7 +329,7 @@ public class JDBCWriter {
             result = rowCount;
 
         } catch (SQLException sqlerror) {
-            System.out.println("sql fejl i writeline=" + sqlerror.getMessage());
+            System.out.println("sql fejl i writeline= " + sqlerror.getMessage());
         }
 
 
@@ -365,7 +364,7 @@ public class JDBCWriter {
             result = rowCount;
 
         } catch (SQLException sqlerror) {
-            System.out.println("sql fejl i writeline=" + sqlerror.getMessage());
+            System.out.println("sql fejl i writeline= INSERTCUSTOMER METODE " + sqlerror.getMessage());
         }
 
 
@@ -388,7 +387,7 @@ public class JDBCWriter {
             result = rowCount;
 
         } catch (SQLException sqlerror) {
-            System.out.println("sql fejl i writeline=" + sqlerror.getMessage());
+            System.out.println("sql fejl i writeline=(insert city)" + sqlerror.getMessage());
         }
 
 
@@ -397,17 +396,17 @@ public class JDBCWriter {
 
     }
 
-    public boolean zipCodeExists(int zipcode_id){
+    public boolean zipCodeExists(int zipcode){
         boolean exists = false;
 
 
         PreparedStatement preparedStatement;
-        String searchStr = "SELECT zipcode_id from zipcodes where zipcode_id = ?";
+        String searchStr = "SELECT zipcode_id from zipcodes where zipcode = ?";
         int result = -1;
 
         try {
             preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setInt(1, zipcode_id);
+            preparedStatement.setInt(1, zipcode);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -474,12 +473,12 @@ public class JDBCWriter {
         return exists;
     }
 
-    public int insertZipCode(int zipcode_id,String city_name) throws NullPointerException {
+    public int insertZipCode(int zipcode,String city_name) throws NullPointerException {
         int result = 0;
 
 
-        String insstr = "INSERT INTO zipcodes(zipcode_id,city_id) " +
-                "VALUES ('" + zipcode_id +"','" + getCityIDFromDbByCityName(city_name) + "')";
+        String insstr = "INSERT INTO zipcodes(zipcode,city_id) " +
+                "VALUES ('" + zipcode +"','" + getCityIDFromDbByCityName(city_name) + "')";
 
         PreparedStatement preparedStatement;
 
@@ -490,7 +489,7 @@ public class JDBCWriter {
             result = rowCount;
 
         } catch (SQLException sqlerror) {
-            System.out.println("sql fejl i writeline=" + sqlerror.getMessage());
+            System.out.println("sql fejl i writeline=zip code" + sqlerror.getMessage());
         }
 
 
@@ -514,7 +513,7 @@ public class JDBCWriter {
             result = rowCount;
 
         } catch (SQLException sqlerror) {
-            System.out.println("sql fejl i writeline=" + sqlerror.getMessage());
+            System.out.println("sql fejl i writeline=address " + sqlerror.getMessage());
         }
 
 
@@ -570,15 +569,18 @@ public class JDBCWriter {
         return result;
 
     }
-    public int getZipcodeFromDbByCityName(String city_name) {
+    public int getZipcodeIdFromDbByCustomer(int customer_id) {
 
         PreparedStatement preparedStatement;
-        String searchStr = "SELECT zipcode_id from zipcodes where city_name = ?";
+        String searchStr = "SELECT zipcode_id from zipcodes " +
+                "join addresses using(zipcode_id) " +
+                "join customers using(address_id) " +
+                "where customer_id = ?";
         int result = -1;
 
         try {
             preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setString(1, city_name);
+            preparedStatement.setInt(1, customer_id);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -597,7 +599,11 @@ public class JDBCWriter {
     public String getCityNameFromDbByCustomerId(int customer_id) {
 
         PreparedStatement preparedStatement;
-        String searchStr = "SELECT city_name from customerdata where customer_id = ?";
+        String searchStr = "SELECT city_name from cities " +
+                "join zipcodes using (city_id) " +
+                "join addresses using (zipcode_id) " +
+                "join customers using (address_id) " +
+                "where customer_id = ?";
         String result ="";
 
         try {
@@ -618,8 +624,34 @@ public class JDBCWriter {
 
     }
 
+    public String getAddressNameFromDbByCustomerId(int customer_id) {
+
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT address_name from addresses " +
+                "join customers using(address_id) " +
+                "where customer_id = ?";
+        String result ="";
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, customer_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+
+                result = resultSet.getString(1);
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
+
+    }
+
     public Customer getCustomerFromDBbyId(int id) {
-        ArrayList<Customer> customer = new ArrayList<>();
+        ArrayList<Customer> customerList = new ArrayList<>();
         PreparedStatement preparedStatement;
 
         String searchStr = "SELECT * from customers where customer_id = ?";
@@ -637,20 +669,16 @@ public class JDBCWriter {
                 String last_name = "" + resultSet.getObject("last_name");
                 String email = "" + resultSet.getObject("email");
                 int address_id = Integer.parseInt("" + resultSet.getObject("address_id"));
-                String city_name ;
+                String city_name = getCityNameFromDbByCustomerId(id);
                 int city_id = getCityIDFromDbByCityName(city_name);
-                int zipcode_id;
-                String address_name;
+                int zipcode = getZipcodeFromDbByCustomerId(tempCustomer_id);
+                int zipcode_id = getZipcodeIdFromDbByCustomer(tempCustomer_id); // tester
+                String address_name = getAddressNameFromDbByCustomerId(id);
 
 
-                Car car = new Car(model_name, registration_number, first_registration, odometer2, car_group_id,
-                        brand_id, fuelType_id);
-
-                car.setCar_id(tempCar_id);
-
-                cars.add(car);
-
-
+                Customer customer1 = new Customer(first_name,last_name,email,address_id,address_name,zipcode,city_id,city_name);
+                customer1.setCustomer_id(tempCustomer_id);
+                customerList.add(customer1);
 
             }
 
@@ -658,12 +686,7 @@ public class JDBCWriter {
             error.printStackTrace();
         }
 
-
-
-        return cars.get(0);
-
-
-
+    return customerList.get(0);
     }
 
     public int deleteCustomer(int id) {
@@ -706,10 +729,37 @@ public class JDBCWriter {
         return result;
 
     }
+    public int getZipcodeFromDbByCustomerId(int customer_id) {
 
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT zipcode from zipcodes " +
+                "join addresses using(zipcode_id) " +
+                "join customers using(address_id) " +
+                "where customer_id = ?";
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, customer_id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+
+                result = resultSet.getInt(1);
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
+
+    }
 
     public int updateCustomer(int customer_id, Customer customer) {
 
+        int tempZip = customer.getZipcode();
         String first_name = customer.getFirst_name();
         String last_name = customer.getLast_name();
         String email = customer.getEmail();
@@ -717,27 +767,9 @@ public class JDBCWriter {
         int city_id = customer.getCity_id();
         String city_name = customer.getCity_name();
 
-        if(!cityExists(city_name)) {
-        insertCity(city_name);
-        city_id = getCityIDFromDbByCityName(city_name);
-        }
-
-        int zipcode_id = customer.getZipcode_id();
-
-        //Kontrollerer at zipcode ikke allerede eksisterer.
-        if (!zipCodeExists(zipcode_id)) {
-            insertZipCode(zipcode_id,city_name);
-            zipcode_id = getZipcodeFromDbByCityName(city_name);
-        }
-
-
+        int zipcode = customer.getZipcode();
         int address_id = customer.getAddress_id();
         String address_name = customer.getAddress_name();
-
-        if(!addressExists(address_id)){
-            insertAddress(address_name,zipcode_id);
-            address_id = getAddressIDFromDbByAddressName(address_name);
-        }
 
 
         PreparedStatement preparedStatement;
@@ -745,6 +777,33 @@ public class JDBCWriter {
                 " address_id = ? WHERE customer_id = ?";
 
         int result = -1;
+
+        String updateCity = "UPDATE cities SET city_name = ? WHERE customer_id = ?";
+        String updateZipcode = "UPDATE zipcodes SET zipcode = ? WHERE customer_id = ?";
+        String updateAddress = "UPDATE addresses SET address_name = ? WHERE customer_id = ?";
+
+
+        if(cityExists(city_name)) {
+            System.out.println("Første værdi af Cityexists: " + city_name +" "+ city_id);
+            insertCity(city_name);
+            city_id = getCityIDFromDbByCityName(city_name);
+            System.out.println("Ændrer City: " + city_name + "  " + city_id);
+        }
+
+        //Kontrollerer at zipcode ikke allerede eksisterer.
+        if (zipCodeExists(zipcode)) {
+            System.out.println(tempZip +" "+ city_name +" "+ city_id +" "+ "Første zip værdi");
+            insertZipCode(zipcode,city_name);
+            zipcode = getZipcodeIdFromDbByCustomer(customer_id);
+            System.out.println("Anden værdi ZIP: "+zipcode + "  " +city_name + "  "+city_id);
+        }
+
+        if(addressExists(address_id)){
+            System.out.println(address_name +" "+ zipcode +" "+ address_id +" "+ "Første address name");
+            insertAddress(address_name,zipcode);
+            address_id = getAddressIDFromDbByAddressName(address_name);
+            System.out.println("Ændrer addresse: "+" "+ address_id + "  " +address_name);
+        }
 
         try {
             preparedStatement = connection.prepareStatement(updateStr);
@@ -759,8 +818,8 @@ public class JDBCWriter {
         } catch (SQLException error) {
             error.printStackTrace();
         }
-        return result;
 
+    return result;
 
     }
 
