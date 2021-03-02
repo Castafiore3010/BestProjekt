@@ -13,7 +13,6 @@ public class Main {
         String[] subMenuItems = new String[]{"Insert", "Delete", "Update", "View all Cars"};
         MainMenu menu = new MainMenu("Kailua CarRental", menuItems, "Enter menu number");
         String returnStr = "\nPress any key to return: ";
-        JDBCWriter jdbcWriter = new JDBCWriter();
         int choice;
         int subMenuChoice;
 
