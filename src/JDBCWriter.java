@@ -853,7 +853,7 @@ public class JDBCWriter {
         String email_new = targetChanges.getEmail();
 
         int city_id_old = beforeChanges.getCity_id();
-        int city_id_new = targetChanges.getCity_id();
+
 
         String city_name_old = beforeChanges.getCity_name();
         String city_name_new = targetChanges.getCity_name();
@@ -861,11 +861,9 @@ public class JDBCWriter {
         int zipcode_old = beforeChanges.getZipcode();
         int zipcode_new = targetChanges.getZipcode();
 
-        int zipcode_id_old = beforeChanges.getZipcode_id();
-        int zipcode_id_new = targetChanges.getZipcode_id();
 
         int address_id_old = beforeChanges.getAddress_id();
-        int address_id_new = targetChanges.getAddress_id();
+
 
         String address_name_old = beforeChanges.getAddress_name();
         String address_name_new = targetChanges.getAddress_name();
