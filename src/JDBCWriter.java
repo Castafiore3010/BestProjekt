@@ -147,6 +147,8 @@ public class JDBCWriter {
 
     }
 
+    // GUI METODE
+
     public int getLatestCarIndex() {
         PreparedStatement preparedStatement;
         String searchStr = "SELECT max(car_id) from cars";
@@ -167,7 +169,7 @@ public class JDBCWriter {
         return Integer.parseInt(result);
 
     }
-
+// GUI METODE
     public Car getLatestCar(int index) {
         ArrayList<Car> cars = new ArrayList<>();
         PreparedStatement preparedStatement;
@@ -467,12 +469,12 @@ public class JDBCWriter {
         return exists;
     }
 
-    public int insertZipCode(int zipcode, String city_name) throws NullPointerException {
+    public int insertZipCode(int zipcode, int city_id) throws NullPointerException {
         int result = 0;
 
 
         String insstr = "INSERT INTO zipcodes(zipcode,city_id) " +
-                "VALUES ('" + zipcode + "','" + getCityIDFromDbByCityName(city_name) + "')";
+                "VALUES ('" + zipcode + "','" + city_id + "')";
 
         PreparedStatement preparedStatement;
 
@@ -549,6 +551,31 @@ public class JDBCWriter {
         try {
             preparedStatement = connection.prepareStatement(searchStr);
             preparedStatement.setString(1, city_name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+
+                result = resultSet.getInt(1);
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
+
+    }
+
+
+    public int getZipIDFromDbByCityId(int city_id) {
+
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT zipcode_id from zipcodes where city_id = ?";
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, city_id);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {

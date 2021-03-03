@@ -98,6 +98,7 @@ public class Main {
                             jdbcWriter.insertCustomer(customer);
                             break;
                         case 2: //Delete customer
+                            scanner.nextLine();
                             System.out.println("Please enter ID number of customer you wish to delete: ");
                             System.out.println("Enter first name of customer");
                             String fname = readChoiceString();
@@ -322,15 +323,17 @@ public class Main {
 
 
         jdbcWriter.insertCity(city_name);
-        if (!jdbcWriter.zipCodeExists(zipcode)){
-            jdbcWriter.insertZipCode(zipcode,city_name);
-        }
+        city_id = jdbcWriter.getCityIDFromDbByCityName(city_name);
+        jdbcWriter.insertZipCode(zipcode,city_id);
+        zipcode_id = jdbcWriter.getZipIDFromDbByCityId(city_id);
+        jdbcWriter.insertAddress(address_name,zipcode_id);
 
-        jdbcWriter.insertAddress(address_name,zipcode);
+
         address_id = jdbcWriter.getAddressIDFromDbByAddressName(address_name);
         city_id = jdbcWriter.getCityIDFromDbByCityName(city_name);
         zipcode_id = jdbcWriter.getZipcodeIdFromDbByAddressId(address_id);
         customer = new Customer(first_name,last_name,email,address_id,address_name,zipcode, zipcode_id,city_id,city_name);
+
 
         return customer;
     }
