@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class JDBCWriter {
@@ -11,7 +12,7 @@ public class JDBCWriter {
         boolean bres = false;
 
         try {
-            connection = DriverManager.getConnection(url, "Marc", "wilma");
+            connection = DriverManager.getConnection(url, "root", "fisse123");
             bres = true;
         } catch (SQLException error) {
             System.out.println("\nNo connection made");
@@ -391,83 +392,6 @@ public class JDBCWriter {
 
     }
 
-    public boolean zipCodeExists(int zipcode) {
-        boolean exists = false;
-
-
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT zipcode_id from zipcodes where zipcode = ?";
-        int result = -1;
-
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setInt(1, zipcode);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-
-                result = resultSet.getInt(1);
-            }
-
-            exists = true;
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        return exists;
-    }
-
-    public boolean cityExists(String city_name) {
-        boolean exists = false;
-
-
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT city_id from cities where city_name = ?";
-        int result = -1;
-
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setString(1, city_name);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-
-                result = resultSet.getInt(1);
-            }
-
-            exists = true;
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        return exists;
-    }
-
-    public boolean addressExists(int address_id) {
-        boolean exists = false;
-
-
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT address_id from addresses where address_id = ?";
-        int result = -1;
-
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setInt(1, address_id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-
-                result = resultSet.getInt(1);
-            }
-
-            exists = true;
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        return exists;
-    }
 
     public int insertZipCode(int zipcode, int city_id) throws NullPointerException {
         int result = 0;
@@ -713,7 +637,7 @@ public class JDBCWriter {
             while (resultSet.next()) {
 
                 String customer_id = "" + resultSet.getObject("customer_id");
-                Integer tempCustomer_id = Integer.parseInt(customer_id);
+                int tempCustomer_id = Integer.parseInt(customer_id);
                 String first_name = "" + resultSet.getObject("first_name");
                 String last_name = "" + resultSet.getObject("last_name");
                 String email = "" + resultSet.getObject("email");
@@ -749,6 +673,111 @@ public class JDBCWriter {
             preparedStatement.setInt(1, id);
             result = preparedStatement.executeUpdate();
 
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+        return result;
+    }
+
+
+    public int getCityIdFromDbByCustomerId(int customer_id) {
+
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT city_id from cities " +
+                "join zipcodes using(city_id) " +
+                "join addresses using(zipcode_id) " +
+                "join customers using(address_id) " +
+                "where customer_id = ?";
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, customer_id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+
+                result = resultSet.getInt(1);
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
+
+    }
+
+    public int getAddressIdFromDbByCustomerId(int customer_id) {
+
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT address_id from addresses " +
+                "join customers using(address_id) " +
+                "where customer_id = ?";
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, customer_id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+
+                result = resultSet.getInt(1);
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
+
+    }
+
+    public int deleteCityByCityId(int city_id){
+        String deleteString = "DELETE from cities where city_id = ? ";
+        PreparedStatement preparedStatement;
+        int result = -1;
+        try {
+            preparedStatement = connection.prepareStatement(deleteString);
+            preparedStatement.setInt(1, city_id);
+            result = preparedStatement.executeUpdate();
+            System.out.println(city_id+"Dette er den hentede city_id i metode");
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+        return result;
+    }
+
+
+    public int deleteZipCodeIdByAddressId(int zipcode_id){
+        String deleteString = "DELETE from zipcodes " +
+                "where zipcode_id = ?";
+        PreparedStatement preparedStatement;
+        int result = -1;
+        try {
+            preparedStatement = connection.prepareStatement(deleteString);
+            preparedStatement.setInt(1, zipcode_id);
+            result = preparedStatement.executeUpdate();
+            System.out.println(zipcode_id+"Dette er den hentede zip i metode");
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+        return result;
+    }
+
+    public int deleteAddressByAddressId(int address_id){
+        String deleteString = "DELETE from addresses where address_id = ? ";
+        PreparedStatement preparedStatement;
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(deleteString);
+            preparedStatement.setInt(1, address_id);
+            result = preparedStatement.executeUpdate();
+            System.out.println(address_id+"Dette er den hentede address i metode");
         } catch (SQLException error) {
             error.printStackTrace();
         }
@@ -902,12 +931,7 @@ public class JDBCWriter {
 
         int result = -1;
 
-
-        String updateCity = "UPDATE cities SET city_name = ? where city_id = ?";
-        String updateZipcode = "UPDATE zipcodes SET zipcode = ? WHERE zipcode_id = ?";
-        String updateAddress = "UPDATE addresses SET address_name = ? WHERE customer_id = ?";
-
-
+        // Hvis der er ingen ændringer, så ryger vi bare ud af metoden.
         if (first_name_old.equalsIgnoreCase(first_name_new) && last_name_old.equalsIgnoreCase(last_name_new)
                 && email_old.equalsIgnoreCase(email_new) && address_name_old.equalsIgnoreCase(address_name_new)
                 && zipcode_old == zipcode_new && city_name_old.equalsIgnoreCase(city_name_new)) {
@@ -915,13 +939,13 @@ public class JDBCWriter {
             return result;
         }
 
+        boolean test=false;
 
         // hvis enten zipcode, city_name eller street_name er blevet opdateret
         if (zipcode_old != zipcode_new || !city_name_old.equalsIgnoreCase(city_name_new) ||
                 !address_name_old.equalsIgnoreCase(address_name_new)) {
 
             // tilfælde hvor KUN zipcode er ændret. TESTET!
-
             if (zipcode_old != zipcode_new && city_name_old.equalsIgnoreCase(city_name_new) &&
                     address_name_old.equalsIgnoreCase(address_name_new)) {
                 System.out.println("It seems that the Zipcode value has been updated - to avoid confusion in our database" +
@@ -943,6 +967,8 @@ public class JDBCWriter {
                 } else {
                     updateAddressName(address_name_old, address_id_old);
                 }
+
+            test=true; // sat til at stoppe koden i at gå i gang længere nede.
 
             }
             // tilfælde hvor KUN city name er ændret. TESTET!
@@ -968,7 +994,7 @@ public class JDBCWriter {
                 } else {
                     updateAddressName(address_name_old, address_id_old);
                 }
-
+                test=true; // sat til at stoppe koden i at gå i gang længere nede.
             }
 
 
@@ -1012,11 +1038,12 @@ public class JDBCWriter {
                     }
                 }
                 updateAddressName(address_name_new, address_id_old);
+                test=true; // sat til at stoppe koden i at gå i gang længere nede.
             }
 
             // tilfælde hvor både zipcode og city_name er ændret, men ikke address_name. TESTET!
             if (zipcode_old != zipcode_new && !city_name_old.equalsIgnoreCase(city_name_new) &&
-                    address_name_old.equalsIgnoreCase(address_name_new)) {
+                    address_name_old.equalsIgnoreCase(address_name_new) && !test) {
                 System.out.println("It seems that the zipcode and city_name values have been updated," +
                         "however the street name value has not");
                 System.out.println("Do you wish to enter a new street name? (1 for yes, 0 for no)");
@@ -1043,7 +1070,7 @@ public class JDBCWriter {
             // tilfælde hvor zipcode og address_name er ændret, men ikke city_name. TESTET!
 
             if (zipcode_old != zipcode_new && city_name_old.equalsIgnoreCase(city_name_new) &&
-                    !address_name_old.equalsIgnoreCase(address_name_new)) {
+                    !address_name_old.equalsIgnoreCase(address_name_new) && !test) {
                 System.out.println("It seems that the zipcode and street_name values have been updated," +
                         "however the city_name value has not");
                 System.out.println("Do you wish to enter a new city name? (1 for yes, 0 for no)");
@@ -1069,7 +1096,7 @@ public class JDBCWriter {
             // tilfælde hvor city_name og address_name er ændret, men ikke zipcode TESTET
 
             if (zipcode_old == zipcode_new && !city_name_old.equalsIgnoreCase(city_name_new) &&
-                    !address_name_old.equalsIgnoreCase(address_name_new)) {
+                    !address_name_old.equalsIgnoreCase(address_name_new) && !test) {
                 System.out.println("It seems that the city_name and street_name values have been updated," +
                         "however the zipcode value has not");
                 System.out.println("Do you wish to enter a new zipcode? (1 for yes, 0 for no)");
@@ -1120,21 +1147,80 @@ public class JDBCWriter {
             error9000.printStackTrace();
         }
 
-
         System.out.println("Successfully updated customer");
 
+        return result;
+    }
+
+    public RentalContract getRentalContractByRCID(int rental_contract_id){
+        ArrayList<RentalContract> rentalContractList = new ArrayList<>();
+        PreparedStatement preparedStatement;
+
+        String searchStr = "SELECT * from rental_contracts where rental_contract_id = ?";
 
 
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, rental_contract_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
+            while (resultSet.next()) {
+
+                int rc_id = resultSet.getInt("rental_contract_id");
+                LocalDateTime start_time = (LocalDateTime) resultSet.getObject("start_time");
+                LocalDateTime end_time = (LocalDateTime) resultSet.getObject("end_time");
+                double max_km = resultSet.getDouble("max_km");
+                int customer_id = resultSet.getInt("customer_id");
+                int car_id = resultSet.getInt("car_id");
+
+                RentalContract rentalContract = new RentalContract(start_time,end_time,max_km,customer_id,car_id);
+                rentalContract.setRental_contract_id(rc_id);
+
+                rentalContractList.add(rentalContract);
+
+
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return rentalContractList.get(0);
+    }
+
+    public int insertRentalContract(RentalContract rentalContract) throws NullPointerException {
+
+        String insstr = "INSERT INTO rental_contracts(start_time, end_time, max_km, customer_id,car_id) " +
+                "VALUES ('" + rentalContract.getRental_start() + "','" + rentalContract.getRental_end() + "','" +
+                rentalContract.getMax_km() + "','" + rentalContract.getCustomer_id() +
+                "','" +rentalContract.getCar_id() + "')";
+
+        PreparedStatement preparedStatement;
+        int result = 0;
+
+        try {
+            preparedStatement = connection.prepareStatement(insstr);
+            int rowCount = preparedStatement.executeUpdate();
+            result = rowCount;
+
+        } catch (SQLException sqlerror) {
+            System.out.println("sql fejl i writeline= INSERTCUSTOMER METODE " + sqlerror.getMessage());
+        }
+
+
+        System.out.println("\nSuccesfully saved customer entry to DataBase\n");
         return result;
 
-
     }
+
+
+
+
 }
 
 
     // ---------------------------------------------------
-    // ---------------------------------------------------
+    // --------------------------------------------------- Y I K E S
     // ---------------------------------------------------
     // ---------------------------------------------------
     // ---------------------------------------------------

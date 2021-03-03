@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -11,6 +12,8 @@ public class Main {
     public void run() {
         String[] menuItems = new String[]{"Connect to DB", "Cars", "Customers", "Rentals"};
         String[] subMenuItems = new String[]{"Insert", "Delete", "Update", "View all Cars"};
+        String[] subMenuItemsCustomer = new String[]{"Insert","Delete","Update"};
+        String[] subMenuItemsRC = new String[]{"Insert","Delete","Update"};
         MainMenu menu = new MainMenu("Kailua CarRental", menuItems, "Enter menu number");
         String returnStr = "\nPress any key to return: ";
         int choice;
@@ -23,7 +26,9 @@ public class Main {
 
         while (run) {
 
-            boolean subMenuRun = true;
+            boolean subMenuCarsRun = true;
+            boolean subMenuCustomerRun = true;
+            boolean subMenuRentalContractsRun = true;
 
             menu.displayMenu();
 
@@ -47,7 +52,7 @@ public class Main {
                     break;
 
                 case 2: // Cars submenu
-                    while (subMenuRun) {
+                    while (subMenuCarsRun) {
                         MainMenu subMenuCars = new MainMenu("Cars -- Exit returns to main menu", subMenuItems,
                                 "Enter menu number");
                         subMenuCars.displayMenu();
@@ -74,7 +79,7 @@ public class Main {
                                 displayList(cars);
                                 break;
                             case 5:
-                                subMenuRun = false;
+                                subMenuCarsRun = false;
                                 break;
 
                         }
@@ -82,11 +87,12 @@ public class Main {
                             System.out.print("\nEnter r to return: ");
                             scanner.next();
                         }
-                    }
+                    } //while loop
                     break;
                 case 3: // Customers submenu
+                    while (subMenuCustomerRun){
                     MainMenu subMenuCustomers = new MainMenu("Customers -- Exit returns to main menu",
-                            subMenuItems,"Enter menu number");
+                            subMenuItemsCustomer,"Enter menu number");
                     subMenuCustomers.displayMenu();
                     subMenuChoice = subMenuCustomers.readMenuChoice();
 
@@ -98,35 +104,48 @@ public class Main {
                             jdbcWriter.insertCustomer(customer);
                             break;
                         case 2: //Delete customer
-                            scanner.nextLine();
-                            System.out.println("Please enter ID number of customer you wish to delete: ");
-                            System.out.println("Enter first name of customer");
-                            String fname = readChoiceString();
-                            System.out.println("Enter last name of customer");
-                            String lname = readChoiceString();
-                            int id = jdbcWriter.getCustomerIdFromDB(fname,lname);
-                            jdbcWriter.deleteCustomer(id);
-                            System.out.println("Successfully deleted the customer with customer id: "+id+
-                                    "\nand the name: "+fname+" "+lname);
+                            deleteCustomerfefe();
                             break;
                         case 3: //Update customer
                             updateCustomer();
                             break;
-                        case 4: //View all cars
-                            displayList(cars);
+                        case 4:
+                            subMenuCarsRun = false;
                             break;
-                        case 5:
-                            subMenuRun = false;
-                            break;
-
                     }
-                    if (subMenuChoice != 5) {
+
+                    if (subMenuChoice != 4) {
                         System.out.print("\nEnter r to return: ");
                         scanner.next();
                     }
-
+                    } // while loop
                     break;
 
+                case 4: // RentalContract submenu
+                    MainMenu subMenuRentalContracts = new MainMenu("Rental Contracts -- Exit returns to main menu",
+                            subMenuItemsRC,"Enter menu number");
+                    subMenuRentalContracts.displayMenu();
+                    subMenuChoice = subMenuRentalContracts.readMenuChoice();
+
+
+                    switch(subMenuChoice){
+                        case 1: // Insert
+
+                            //jdbcWriter.insertRentalContract();
+                            break;
+                        case 2: // Delete
+
+                            break;
+                        case 3: // Update
+
+                            break;
+                        case 4: // hjælp
+
+                            break;
+
+                    }
+
+                    break;
                 case 5:
                     System.out.println("Thank you for using kailua database management app");
                     run = false;
@@ -137,6 +156,47 @@ public class Main {
         }
 
 
+    }
+
+
+    public RentalContract createRentalContract() {
+        RentalContract rentalContract;
+        LocalDateTime start_time;
+        LocalDateTime end_time;
+        double max_km;
+        int customer_id;
+        int car_id;
+
+        //Contact
+        System.out.println("Enter start_time: ");
+        start_time = LocalDateTime.parse(readChoiceString());
+        System.out.println("Enter expected end_time: ");
+        end_time = LocalDateTime.parse(readChoiceString());
+        System.out.println("Enter max km: ");
+        max_km = readChoiceDouble();
+
+        //Address
+        System.out.println("Enter customer_id: ");
+        customer_id = readChoiceInt();
+        System.out.println("Enter car_id: ");
+        car_id = readChoiceInt();
+        scanner.nextLine(); // scannerbug
+
+
+        jdbcWriter.insertCity(city_name);
+        city_id = jdbcWriter.getCityIDFromDbByCityName(city_name);
+        jdbcWriter.insertZipCode(zipcode,city_id);
+        zipcode_id = jdbcWriter.getZipIDFromDbByCityId(city_id);
+        jdbcWriter.insertAddress(address_name,zipcode_id);
+
+
+        address_id = jdbcWriter.getAddressIDFromDbByAddressName(address_name);
+        city_id = jdbcWriter.getCityIDFromDbByCityName(city_name);
+        zipcode_id = jdbcWriter.getZipcodeIdFromDbByAddressId(address_id);
+        customer = new Customer(first_name,last_name,email,address_id,address_name,zipcode, zipcode_id,city_id,city_name);
+
+
+        return customer;
     }
 
 
@@ -337,6 +397,34 @@ public class Main {
 
         return customer;
     }
+
+    public void deleteCustomerfefe() {
+
+        System.out.println("Please enter ID number of customer you wish to delete: ");
+        int customer_id = readChoiceInt();
+        Customer customer = jdbcWriter.getCustomerFromDBbyId(customer_id);
+        String fname = customer.getFirst_name();
+        String lname = customer.getLast_name();
+
+        int address_id = customer.getAddress_id();
+        int zipcode_id = customer.getZipcode_id();
+
+        int city_id = customer.getCity_id();
+        System.out.println(address_id+" "+zipcode_id+" "+city_id);
+
+        jdbcWriter.deleteCustomer(customer_id);
+        jdbcWriter.deleteAddressByAddressId(customer_id);
+        jdbcWriter.deleteZipCodeIdByAddressId(customer_id);
+        jdbcWriter.deleteCityByCityId(customer_id);
+
+
+
+        System.out.println("Successfully deleted the customer with customer id: "+customer_id+
+                "\nand the name: "+fname+" "+lname);
+
+    }
+
+
 
     public void updateCustomer() {
         System.out.println("Please enter ID of the customer you wish to update");

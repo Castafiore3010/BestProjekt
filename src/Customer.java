@@ -17,7 +17,6 @@ public class Customer {
 
     private String city_name;
 
-    // _____________________
 
     public int getZipcode_id() {
         return zipcode_id;
