@@ -60,7 +60,9 @@ public class RentalContract {
         this.car_id = car_id;
     }
 
+    RentalContract(){
 
+    }
     RentalContract(LocalDateTime rental_start, LocalDateTime rental_end, double max_km, int customer_id, int car_id){
         this.rental_start=rental_start;
         this.rental_end=rental_end;

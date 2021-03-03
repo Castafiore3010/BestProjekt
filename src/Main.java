@@ -160,7 +160,7 @@ public class Main {
 
 
     public RentalContract createRentalContract() {
-        RentalContract rentalContract;
+        RentalContract rentalContract = new RentalContract(); // fix me
         LocalDateTime start_time;
         LocalDateTime end_time;
         double max_km;
@@ -183,20 +183,8 @@ public class Main {
         scanner.nextLine(); // scannerbug
 
 
-        jdbcWriter.insertCity(city_name);
-        city_id = jdbcWriter.getCityIDFromDbByCityName(city_name);
-        jdbcWriter.insertZipCode(zipcode,city_id);
-        zipcode_id = jdbcWriter.getZipIDFromDbByCityId(city_id);
-        jdbcWriter.insertAddress(address_name,zipcode_id);
 
-
-        address_id = jdbcWriter.getAddressIDFromDbByAddressName(address_name);
-        city_id = jdbcWriter.getCityIDFromDbByCityName(city_name);
-        zipcode_id = jdbcWriter.getZipcodeIdFromDbByAddressId(address_id);
-        customer = new Customer(first_name,last_name,email,address_id,address_name,zipcode, zipcode_id,city_id,city_name);
-
-
-        return customer;
+    return rentalContract;
     }
 
 
