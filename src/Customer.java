@@ -5,13 +5,8 @@ public class Customer {
     private String last_name;
     private String email;
     private int address_id;
-
     private String address_name;
-
     private int zipcode;
-
-
-
     private int zipcode_id;
     private int city_id;
 
@@ -116,7 +111,17 @@ public class Customer {
     }
 
 
-
+    @Override
+    public String toString() {
+        return "Selected Customer:" +
+                "\nCustomer ID: " + customer_id +
+                "\nFirst name: " + first_name +
+                "\nLast name: " + last_name +
+                "\nEmail: " + email +
+                "\nStreetaddress: " + address_name +
+                "\nZipcode: " + zipcode +
+                "\nCity name: " + city_name;
+    }
 
 
 

@@ -21,11 +21,9 @@ public class JDBCWriter {
             System.out.println("\nNo connection made");
         }
         return bres;
-
     }
 
     public int updateCar(int carId, Car car) {
-
         String model_name = car.getModel_name();
         String registration_number = car.getRegistration_number();
         LocalDate first_registration = car.getFirst_registration();
@@ -60,47 +58,6 @@ public class JDBCWriter {
             error.printStackTrace();
         }
         return result;
-
-
-    }
-
-    public ArrayList<Car> getCarsFromDatabase() {
-        ArrayList<Car> cars = new ArrayList<>();
-
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT * from cars";
-
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            int i = 1;
-            while (resultSet.next()) {
-
-                String car_id = "" + resultSet.getObject("car_id");
-                Integer help = Integer.parseInt(car_id);
-                String model_name = "" + resultSet.getObject("model_name");
-                String registration_number = "" + resultSet.getObject("registration_number");
-                LocalDate first_registration = LocalDate.parse("" + resultSet.getObject("first_registration"));
-                String odometer = "" + resultSet.getObject("odometer");
-                Double odometer2 = Double.parseDouble(odometer);
-                int car_group_id = (int) resultSet.getObject("car_group_id");
-                int brand_id = (int) resultSet.getObject("brand_id");
-                int fuelType_id = (int) resultSet.getObject("fueltype_id");
-
-                Car car = new Car(model_name, registration_number, first_registration, odometer2, car_group_id,
-                        brand_id, fuelType_id);
-
-                car.setCar_id(help);
-
-                cars.add(car);
-            }
-
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        return cars;
 
 
     }
@@ -147,9 +104,8 @@ public class JDBCWriter {
 
         return cars.get(0);
 
-
     }
-    // GUI METODE
+
     public int getLatestCarIndex() {
         PreparedStatement preparedStatement;
         String searchStr = "SELECT max(car_id) from cars";
@@ -170,100 +126,7 @@ public class JDBCWriter {
         return Integer.parseInt(result);
 
     }
-    // GUI METODE
-    public Car getLatestCar(int index) {
-        ArrayList<Car> cars = new ArrayList<>();
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT * from cars where car_id = ?";
 
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setInt(1, index);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-
-                String car_id = "" + resultSet.getObject("car_id");
-                Integer help = Integer.parseInt(car_id);
-                String model_name = "" + resultSet.getObject("model_name");
-                String registration_number = "" + resultSet.getObject("registration_number");
-                LocalDate first_registration = LocalDate.parse("" + resultSet.getObject("first_registration"));
-                String odometer = "" + resultSet.getObject("odometer");
-                Double odometer2 = Double.parseDouble(odometer);
-                int car_group_id = (int) resultSet.getObject("car_group_id");
-                int brand_id = (int) resultSet.getObject("brand_id");
-                int fuelType_id = (int) resultSet.getObject("fueltype_id");
-
-                Car car = new Car(model_name, registration_number, first_registration, odometer2, car_group_id,
-                        brand_id, fuelType_id);
-
-                car.setCar_id(help);
-
-                cars.add(car);
-            }
-
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        Car tempCar;
-
-        int length = cars.size();
-        tempCar = cars.get(length - 1);
-
-        return tempCar;
-
-
-    }
-
-    public int getCarIdFromDB(String modelName) {
-
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT car_id from cars where model_name = ?";
-        int result = -1;
-
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setString(1, modelName);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-
-                result = resultSet.getInt(1);
-            }
-
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        return result;
-
-
-    }
-
-    public String getBrandNameFromDB(int id) {
-
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT brand_name from brands where brand_id = ?";
-        String result = "";
-
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-
-                result = "" + resultSet.getObject(1);
-            }
-
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        return result;
-
-    }
 
     public int deleteCar(int id) {
 
@@ -282,38 +145,15 @@ public class JDBCWriter {
         return result;
     }
 
-    public int searchDB(String url, String line) {
-
-        String searchStr = "SELECT count(*) from urlreads where url like ? and line like ?";
-        PreparedStatement preparedStatement;
-        int result = -1;
-
-        try {
-
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setString(1, "%" + url + "%");
-            preparedStatement.setString(2, "%" + line + "%");
-            ResultSet resSet = preparedStatement.executeQuery();
-            if (resSet.next()) {
-                String str = "" + resSet.getObject(1);
-                result = Integer.parseInt(str);
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return result;
-    }
-
     public int isCarAvailable(String start_time, String end_time, int car_id) {
 
         PreparedStatement preparedStatement;
         String searchStr = "SELECT count(*) from rental_contracts " +
-                "                join cars using (car_id) " +
-                "                where car_id = ? " +
-                "                and ((start_time between ? and ?) " +
-                "                or " +
-                "                (end_time between ? and ?)) ";
+                "join cars using (car_id) " +
+                "where car_id = ? " +
+                "and ((start_time between ? and ?) " +
+                "or " +
+                "(end_time between ? and ?)) ";
         int result = -1;
 
         try {
@@ -341,13 +181,18 @@ public class JDBCWriter {
 
         String insstr = "INSERT INTO cars(model_name, registration_number, first_registration, " +
                 "odometer, car_group_id, brand_id, fueltype_id) " +
-                "VALUES ('" + car.getModel_name() + "','" + car.getRegistration_number() + "','" +
-                car.getFirst_registration() + "','" + car.getOdometer() + "','" + car.getCar_group_id() +
-                "','" + car.getBrand_id() + "','" + car.getFuelType_id() + "')";
+                "VALUES ('" +
+                car.getModel_name() + "','" +
+                car.getRegistration_number() + "','" +
+                car.getFirst_registration() + "','" +
+                car.getOdometer() + "','" +
+                car.getCar_group_id() + "','" +
+                car.getBrand_id() + "','" +
+                car.getFuelType_id() +
+                "')";
 
         PreparedStatement preparedStatement;
         int result = 0;
-
 
         try {
             preparedStatement = connection.prepareStatement(insstr);
@@ -358,7 +203,6 @@ public class JDBCWriter {
             System.out.println("sql fejl i writeline= " + sqlerror.getMessage());
         }
 
-
         System.out.println("\nSuccesfully saved car entry to DataBase\n");
         return result;
 
@@ -367,8 +211,12 @@ public class JDBCWriter {
     public int insertCustomer(Customer customer) throws NullPointerException {
 
         String insstr = "INSERT INTO customers(first_name, last_name, email, address_id) " +
-                "VALUES ('" + customer.getFirst_name() + "','" + customer.getLast_name() + "','" +
-                customer.getEmail() + "','" + customer.getAddress_id() + "')";
+                "VALUES ('" +
+                customer.getFirst_name() + "','" +
+                customer.getLast_name() + "','" +
+                customer.getEmail() + "','" +
+                customer.getAddress_id() +
+                "')";
 
         PreparedStatement preparedStatement;
         int result = 0;
@@ -695,62 +543,6 @@ public class JDBCWriter {
         return result;
     }
 
-    public int getCityIdFromDbByCustomerId(int customer_id) {
-
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT city_id from cities " +
-                "join zipcodes using(city_id) " +
-                "join addresses using(zipcode_id) " +
-                "join customers using(address_id) " +
-                "where customer_id = ?";
-        int result = -1;
-
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setInt(1, customer_id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-
-                result = resultSet.getInt(1);
-            }
-
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        return result;
-
-    }
-
-    public int getAddressIdFromDbByCustomerId(int customer_id) {
-
-        PreparedStatement preparedStatement;
-        String searchStr = "SELECT address_id from addresses " +
-                "join customers using(address_id) " +
-                "where customer_id = ?";
-        int result = -1;
-
-        try {
-            preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setInt(1, customer_id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-
-                result = resultSet.getInt(1);
-            }
-
-        } catch (SQLException error) {
-            error.printStackTrace();
-        }
-
-        return result;
-
-    }
-
     public int deleteCityByCityId(int city_id){
         String deleteString = "DELETE from cities where city_id = ? ";
         PreparedStatement preparedStatement;
@@ -998,13 +790,13 @@ public class JDBCWriter {
             return result;
         }
 
-        boolean test=false;
+        boolean stop=false;
 
         // hvis enten zipcode, city_name eller street_name er blevet opdateret
         if (zipcode_old != zipcode_new || !city_name_old.equalsIgnoreCase(city_name_new) ||
                 !address_name_old.equalsIgnoreCase(address_name_new)) {
 
-            // tilfælde hvor KUN zipcode er ændret. TESTET!
+            // tilfælde hvor KUN zipcode er ændret.
             if (zipcode_old != zipcode_new && city_name_old.equalsIgnoreCase(city_name_new) &&
                     address_name_old.equalsIgnoreCase(address_name_new)) {
                 System.out.println("It seems that the Zipcode value has been updated - to avoid confusion in our database" +
@@ -1027,11 +819,11 @@ public class JDBCWriter {
                     updateAddressName(address_name_old, address_id_old);
                 }
 
-            test=true; // sat til at stoppe koden i at gå i gang længere nede.
+            stop=true; // sat til at stoppe koden i at gå i gang længere nede. (Multiple changes)
 
             }
-            // tilfælde hvor KUN city name er ændret. TESTET!
 
+            // tilfælde hvor KUN city name er ændret.
             if (!city_name_old.equalsIgnoreCase(city_name_new) && zipcode_old == zipcode_new
                     && address_name_old.equalsIgnoreCase(address_name_new)) {
                 System.out.println("It seems that the City name value has been updated - to avoid confusion in our database" +
@@ -1053,11 +845,11 @@ public class JDBCWriter {
                 } else {
                     updateAddressName(address_name_old, address_id_old);
                 }
-                test=true; // sat til at stoppe koden i at gå i gang længere nede.
+                stop=true; // sat til at stoppe koden i at gå i gang længere nede.
             }
 
 
-            /// tilfælde hvor KUN address name er ændret. TESTET!
+            /// tilfælde hvor KUN address name er ændret.
             if (zipcode_old == zipcode_new && city_name_old.equalsIgnoreCase(city_name_new) &&
                     !address_name_old.equalsIgnoreCase(address_name_new)) {
                 System.out.println("It seems that the Street name value has been updated, however City name and Zipcode hasn't been");
@@ -1097,12 +889,12 @@ public class JDBCWriter {
                     }
                 }
                 updateAddressName(address_name_new, address_id_old);
-                test=true; // sat til at stoppe koden i at gå i gang længere nede.
+                stop=true; // sat til at stoppe koden i at gå i gang længere nede.
             }
 
-            // tilfælde hvor både zipcode og city_name er ændret, men ikke address_name. TESTET!
+            // tilfælde hvor både zipcode og city_name er ændret, men ikke address_name.
             if (zipcode_old != zipcode_new && !city_name_old.equalsIgnoreCase(city_name_new) &&
-                    address_name_old.equalsIgnoreCase(address_name_new) && !test) {
+                    address_name_old.equalsIgnoreCase(address_name_new) && !stop) {
                 System.out.println("It seems that the zipcode and city_name values have been updated," +
                         "however the street name value has not");
                 System.out.println("Do you wish to enter a new street name? (1 for yes, 0 for no)");
@@ -1126,10 +918,10 @@ public class JDBCWriter {
             }
 
 
-            // tilfælde hvor zipcode og address_name er ændret, men ikke city_name. TESTET!
+            // tilfælde hvor zipcode og address_name er ændret, men ikke city_name.
 
             if (zipcode_old != zipcode_new && city_name_old.equalsIgnoreCase(city_name_new) &&
-                    !address_name_old.equalsIgnoreCase(address_name_new) && !test) {
+                    !address_name_old.equalsIgnoreCase(address_name_new) && !stop) {
                 System.out.println("It seems that the zipcode and street_name values have been updated," +
                         "however the city_name value has not");
                 System.out.println("Do you wish to enter a new city name? (1 for yes, 0 for no)");
@@ -1152,10 +944,10 @@ public class JDBCWriter {
                 }
             }
 
-            // tilfælde hvor city_name og address_name er ændret, men ikke zipcode TESTET
+            // tilfælde hvor city_name og address_name er ændret, men ikke zipcode
 
             if (zipcode_old == zipcode_new && !city_name_old.equalsIgnoreCase(city_name_new) &&
-                    !address_name_old.equalsIgnoreCase(address_name_new) && !test) {
+                    !address_name_old.equalsIgnoreCase(address_name_new) && !stop) {
                 System.out.println("It seems that the city_name and street_name values have been updated," +
                         "however the zipcode value has not");
                 System.out.println("Do you wish to enter a new zipcode? (1 for yes, 0 for no)");
@@ -1191,8 +983,6 @@ public class JDBCWriter {
             }
         }
 
-
-
         // opdatér resterende værdier
         try {
             preparedStatement = connection.prepareStatement(updateStr);
@@ -1211,14 +1001,9 @@ public class JDBCWriter {
         return result;
     }
 
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-
     public int updateRentalContract(int rental_contract_id,RentalContract rentalContract,RentalContract oldRentalContract){
         Main reader = new Main();
 
-        Scanner scanner = new Scanner(System.in);
         LocalDateTime start_time = rentalContract.getRental_start();
         LocalDateTime end_time = rentalContract.getRental_end();
         double max_km = rentalContract.getMax_km();
@@ -1228,9 +1013,6 @@ public class JDBCWriter {
         String start_time_str2 = String.valueOf(start_time);
         String end_time_str2 = String.valueOf(end_time);
 
-        LocalDateTime old_start_time = oldRentalContract.getRental_start();
-        LocalDateTime old_end_time = oldRentalContract.getRental_end();
-        double old_max_km = oldRentalContract.getMax_km();
         int old_customer_id = oldRentalContract.getCustomer_id();
         int old_car_id = oldRentalContract.getCar_id();
 
@@ -1423,6 +1205,7 @@ public class JDBCWriter {
 
 
 
+
     public RentalContract getRentalContractByRCID(int rental_contract_id){
         ArrayList<RentalContract> rentalContractList = new ArrayList<>();
         PreparedStatement preparedStatement;
@@ -1448,8 +1231,6 @@ public class JDBCWriter {
                 rentalContract.setRental_contract_id(rc_id);
 
                 rentalContractList.add(rentalContract);
-
-
             }
 
         } catch (SQLException error) {
@@ -1500,15 +1281,57 @@ public class JDBCWriter {
         return result;
     }
 
-
-
 }
+/*
 
 
 
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.''人
+'（__）
+. ┃口┃
+. ┃口┃
+. ┃口┃　　　　　★
+. ┃口┃ 　　　　''''人
+. ┃口┃ 　　'''''（_____）　　　　　　
+. ┃口┃ 　'''（__________） 　　　　　
+. ┃口┃____╭━━━━━╮_____'|_口|_
+. ┃╭╮╭╮╭╮╭╮╭╮╭╮╭╮ |三||╭╮╭╮ |
+. ┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃ |三||┃┃┃┃ |
+. ┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃ |三||┃┃┃┃ |
+. ┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃ |三||┃┃┃┃ |
+♣══════════ஜ۩۞۩¤இஇஇ¤۩۞۩ஜ══════════♣
+░▓░▓░▓░║+Putin approves this code║░░▓░▓░▓
+♣══════════ஜ۩۞۩¤இஇஇ¤۩۞۩ஜ═════════♣
+
+// The end */  //Click me

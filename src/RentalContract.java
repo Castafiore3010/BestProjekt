@@ -73,6 +73,16 @@ public class RentalContract {
     }
 
 
+    @Override
+    public String toString() {
+        return "Selected Rental Contract:" +
+                "\nRental contract ID: " + rental_contract_id +
+                "\nStart date and time: " + rental_start +
+                "\nEnd date and time: " + rental_end +
+                "\nMax km: " + max_km +
+                "\nCustomer ID: " + customer_id +
+                "\nCar ID: " + car_id ;
+    }
 
 
 

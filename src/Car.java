@@ -93,14 +93,14 @@ public class Car {
 
     @Override
     public String toString() {
-        return "Latest car added: " + "\n" +
-                "model_name : " + model_name + "\n" +
-                "registration_number : " + registration_number + "\n" +
-                "first_registration : " + first_registration + "\n" +
-                "odometer : " + odometer + "\n" +
-                "car_group_id : " + car_group_id + "\n" +
-                "brand_id : " + brand_id + "\n" +
-                "fuelType_id : " + fuelType_id + "\n";
+        return "Selected car:" +
+                "\nModel name: " + model_name +
+                "\nRegistration number: " + registration_number +
+                "\nFirst registration date: " + first_registration +
+                "\nOdometer: " + odometer +"km"+
+                "\nCargroup ID: " + car_group_id +
+                "\nBrand ID: " + brand_id +
+                "\nFuelType ID: " + fuelType_id ;
 
 
     }
