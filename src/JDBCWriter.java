@@ -15,7 +15,7 @@ public class JDBCWriter {
         boolean bres = false;
 
         try {
-            connection = DriverManager.getConnection(url, "root", "fisse123");
+            connection = DriverManager.getConnection(url, "Marc", "wilma");
             bres = true;
         } catch (SQLException error) {
             System.out.println("\nNo connection made");
@@ -105,7 +105,6 @@ public class JDBCWriter {
 
     }
 
-
     public Car getCarFromDBbyIndex(int id) {
         ArrayList<Car> cars = new ArrayList<>();
         PreparedStatement preparedStatement;
@@ -150,9 +149,7 @@ public class JDBCWriter {
 
 
     }
-
     // GUI METODE
-
     public int getLatestCarIndex() {
         PreparedStatement preparedStatement;
         String searchStr = "SELECT max(car_id) from cars";
@@ -173,7 +170,7 @@ public class JDBCWriter {
         return Integer.parseInt(result);
 
     }
-// GUI METODE
+    // GUI METODE
     public Car getLatestCar(int index) {
         ArrayList<Car> cars = new ArrayList<>();
         PreparedStatement preparedStatement;
@@ -244,7 +241,6 @@ public class JDBCWriter {
 
     }
 
-
     public String getBrandNameFromDB(int id) {
 
         PreparedStatement preparedStatement;
@@ -268,7 +264,6 @@ public class JDBCWriter {
         return result;
 
     }
-
 
     public int deleteCar(int id) {
 
@@ -310,7 +305,6 @@ public class JDBCWriter {
         return result;
     }
 
-
     public int isCarAvailable(String start_time, String end_time, int car_id) {
 
         PreparedStatement preparedStatement;
@@ -343,7 +337,6 @@ public class JDBCWriter {
 
     }
 
-
     public int insertCar(Car car) throws NullPointerException {
 
         String insstr = "INSERT INTO cars(model_name, registration_number, first_registration, " +
@@ -370,16 +363,6 @@ public class JDBCWriter {
         return result;
 
     }
-
-
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
-    // ---------------------------------------------------
 
     public int insertCustomer(Customer customer) throws NullPointerException {
 
@@ -427,7 +410,6 @@ public class JDBCWriter {
         return result;
 
     }
-
 
     public int insertZipCode(int zipcode, int city_id) throws NullPointerException {
         int result = 0;
@@ -526,7 +508,6 @@ public class JDBCWriter {
 
     }
 
-
     public int getZipIDFromDbByCityId(int city_id) {
 
         PreparedStatement preparedStatement;
@@ -576,7 +557,6 @@ public class JDBCWriter {
         return result;
 
     }
-
 
     public int getZipcodeIdFromDbByCustomer(int customer_id) {
 
@@ -715,7 +695,6 @@ public class JDBCWriter {
         return result;
     }
 
-
     public int getCityIdFromDbByCustomerId(int customer_id) {
 
         PreparedStatement preparedStatement;
@@ -786,7 +765,6 @@ public class JDBCWriter {
         }
         return result;
     }
-
 
     public int deleteZipCodeIdByAddressId(int zipcode_id){
         String deleteString = "DELETE from zipcodes " +
@@ -866,6 +844,7 @@ public class JDBCWriter {
 
         return result;
     }
+
     public int checkCarExists(int car_id) {
 
         PreparedStatement preparedStatement;
@@ -1385,6 +1364,7 @@ public class JDBCWriter {
                             insertCustomer(customer);
                             rentalContract.setCustomer_id(getCustomerIdFromDB(customer.getEmail()));
                             customerControl=checkCustomerExists(rentalContract.getCustomer_id());
+                            customer_id = rentalContract.getCustomer_id();
                         } else {
                             System.out.println("Error. Contract not updated.");
                             return -1;
@@ -1410,12 +1390,8 @@ public class JDBCWriter {
                         if (choice2 == 1) {
                             Car car = reader.createCar();
                             insertCar(car);
-                            System.out.println("lastest car index  " + getLatestCarIndex());
-                            System.out.println("rentalContract car id: " + rentalContract.getCar_id());
                             rentalContract.setCar_id(getLatestCarIndex());
-                            System.out.println("rentalContract car id efter set: " + rentalContract.getCar_id());
                             carControl=checkCarExists(rentalContract.getCar_id());
-                            System.out.println("carcontrol " + carControl);
                             car_id = getLatestCarIndex();
                         } else {
                             System.out.println("Error. Contract not updated.");
@@ -1424,16 +1400,10 @@ public class JDBCWriter {
 
                     }
                 }
-
-
-                System.out.println(car_id + " car id.");
-                System.out.println(rentalContract.getCar_id() + " rentalcar id.");
             }
 
         }
 
-        System.out.println(car_id + " car id.");
-        car_id = rentalContract.getCar_id();
         try {
                 preparedStatement = connection.prepareStatement(updateStr);
                 preparedStatement.setString(1, start_time_str2);
