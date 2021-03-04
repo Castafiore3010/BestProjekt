@@ -1317,11 +1317,6 @@ public class JDBCWriter {
 
 
 
-
-
-
-
-
 .''人
 '（__）
 . ┃口┃
