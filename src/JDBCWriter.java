@@ -15,7 +15,7 @@ public class JDBCWriter {
         boolean bres = false;
 
         try {
-            connection = DriverManager.getConnection(url, "root", "fisse123");
+            connection = DriverManager.getConnection(url, "Marc", "wilma");
             bres = true;
         } catch (SQLException error) {
             System.out.println("\nNo connection made");
@@ -1385,6 +1385,7 @@ public class JDBCWriter {
                             insertCustomer(customer);
                             rentalContract.setCustomer_id(getCustomerIdFromDB(customer.getEmail()));
                             customerControl=checkCustomerExists(rentalContract.getCustomer_id());
+                            customer_id = rentalContract.getCustomer_id();
                         } else {
                             System.out.println("Error. Contract not updated.");
                             return -1;
@@ -1410,12 +1411,8 @@ public class JDBCWriter {
                         if (choice2 == 1) {
                             Car car = reader.createCar();
                             insertCar(car);
-                            System.out.println("lastest car index  " + getLatestCarIndex());
-                            System.out.println("rentalContract car id: " + rentalContract.getCar_id());
                             rentalContract.setCar_id(getLatestCarIndex());
-                            System.out.println("rentalContract car id efter set: " + rentalContract.getCar_id());
                             carControl=checkCarExists(rentalContract.getCar_id());
-                            System.out.println("carcontrol " + carControl);
                             car_id = getLatestCarIndex();
                         } else {
                             System.out.println("Error. Contract not updated.");
@@ -1424,16 +1421,10 @@ public class JDBCWriter {
 
                     }
                 }
-
-
-                System.out.println(car_id + " car id.");
-                System.out.println(rentalContract.getCar_id() + " rentalcar id.");
             }
 
         }
 
-        System.out.println(car_id + " car id.");
-        car_id = rentalContract.getCar_id();
         try {
                 preparedStatement = connection.prepareStatement(updateStr);
                 preparedStatement.setString(1, start_time_str2);
