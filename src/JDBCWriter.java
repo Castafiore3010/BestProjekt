@@ -34,9 +34,14 @@ public class JDBCWriter {
 
 
         PreparedStatement preparedStatement;
-        String updateStr = "UPDATE cars SET model_name = ?, registration_number = ?, first_registration = ?," +
-                " odometer = ?, car_group_id = ?," +
-                "brand_id = ?, fueltype_id = ? where car_id = ?";
+        String updateStr = "UPDATE cars SET model_name = ?, " +
+                "registration_number = ?, " +
+                "first_registration = ?, " +
+                "odometer = ?, " +
+                "car_group_id = ?, " +
+                "brand_id = ?, " +
+                "fueltype_id = ? " +
+                "where car_id = ?";
 
         int result = -1;
 
@@ -77,12 +82,12 @@ public class JDBCWriter {
             while (resultSet.next()) {
 
                 String car_id = "" + resultSet.getObject("car_id");
-                Integer tempCar_id = Integer.parseInt(car_id);
+                int tempCar_id = Integer.parseInt(car_id);
                 String model_name = "" + resultSet.getObject("model_name");
                 String registration_number = "" + resultSet.getObject("registration_number");
                 LocalDate first_registration = LocalDate.parse("" + resultSet.getObject("first_registration"));
                 String odometer = "" + resultSet.getObject("odometer");
-                Double odometer2 = Double.parseDouble(odometer);
+                double odometer2 = Double.parseDouble(odometer);
                 int car_group_id = (int) resultSet.getObject("car_group_id");
                 int brand_id = (int) resultSet.getObject("brand_id");
                 int fuelType_id = (int) resultSet.getObject("fueltype_id");
@@ -1066,7 +1071,7 @@ public class JDBCWriter {
                 }
 
             } //TILFÆLDE 1 færdig
-            System.out.println("NÅR VI HERNED?");
+
             int counter = 0;
             boolean carCreated = false;
 

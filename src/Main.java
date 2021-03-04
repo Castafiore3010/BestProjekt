@@ -78,7 +78,6 @@ public class Main {
 
                         switch (subMenuChoice) {
                             case 1: // Insert car
-                                scanner.nextLine();
                                 Car newCar;
                                 newCar = createCar();
                                 jdbcWriter.insertCar(newCar);
@@ -456,7 +455,7 @@ public class Main {
         odometer = readChoiceDouble();
         System.out.println("Enter car_group_id (1. Luxury, 2. Family, 3. Sport): ");
         car_group_id = readChoiceInt();
-        System.out.println("Enter brand_id (1. Tesla, 2. Ford, 3. BMW): ");
+        System.out.println("Enter brand_id (1. Tesla, 2. Ford, 3. BMW, 4. Aston Martin, 5. Rolls Royce, 6. Bugatti): ");
         brand_id = readChoiceInt();
         System.out.println("Enter fuelType_id (1. El, 2. Diesel, 3. Benzin)");
         fuelType_id = readChoiceInt();
