@@ -146,7 +146,7 @@ public class CarCreateGUI {
 
 
         if (jdbcWriter.setConnection()) {
-            jdbcWriter.writeLines(car);
+            jdbcWriter.insertCar(car);
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 
 

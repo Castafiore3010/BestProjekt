@@ -1,10 +1,13 @@
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class JDBCWriter {
     private static Connection connection = null;
+    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 
     public boolean setConnection() {
@@ -308,7 +311,40 @@ public class JDBCWriter {
     }
 
 
-    public int writeLines(Car car) throws NullPointerException {
+    public int isCarAvailable(String start_time, String end_time, int car_id) {
+
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT count(*) from rental_contracts " +
+                "                join cars using (car_id) " +
+                "                where car_id = ? " +
+                "                and ((start_time between ? and ?) " +
+                "                or " +
+                "                (end_time between ? and ?)) ";
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, car_id);
+            preparedStatement.setString(2, start_time);
+            preparedStatement.setString(3, end_time);
+            preparedStatement.setString(4, start_time);
+            preparedStatement.setString(5, end_time);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()){
+                result = resultSet.getInt(1);
+            }
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
+
+    }
+
+
+    public int insertCar(Car car) throws NullPointerException {
 
         String insstr = "INSERT INTO cars(model_name, registration_number, first_registration, " +
                 "odometer, car_group_id, brand_id, fueltype_id) " +
@@ -784,16 +820,15 @@ public class JDBCWriter {
         return result;
     }
 
-    public int getCustomerIdFromDB(String first_name, String last_name) {
+    public int getCustomerIdFromDB(String email) {
 
         PreparedStatement preparedStatement;
-        String searchStr = "SELECT customer_id from customers where first_name = ? and last_name = ?";
+        String searchStr = "SELECT customer_id from customers where email = ?";
         int result = -1;
 
         try {
             preparedStatement = connection.prepareStatement(searchStr);
-            preparedStatement.setString(1, first_name);
-            preparedStatement.setString(2, last_name);
+            preparedStatement.setString(1, email);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -807,6 +842,51 @@ public class JDBCWriter {
 
         return result;
 
+    }
+
+    public int checkCustomerExists(int customer_id) {
+
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT count(*) from customers where customer_id = ?";
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, customer_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+
+                result = resultSet.getInt(1);
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
+    }
+    public int checkCarExists(int car_id) {
+
+        PreparedStatement preparedStatement;
+        String searchStr = "SELECT count(*) from cars where car_id = ?";
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(searchStr);
+            preparedStatement.setInt(1, car_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+
+                result = resultSet.getInt(1);
+            }
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+
+        return result;
     }
 
     public int getZipcodeFromDbByCustomerId(int customer_id) {
@@ -1152,6 +1232,227 @@ public class JDBCWriter {
         return result;
     }
 
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+
+    public int updateRentalContract(int rental_contract_id,RentalContract rentalContract,RentalContract oldRentalContract){
+        Main reader = new Main();
+
+        Scanner scanner = new Scanner(System.in);
+        LocalDateTime start_time = rentalContract.getRental_start();
+        LocalDateTime end_time = rentalContract.getRental_end();
+        double max_km = rentalContract.getMax_km();
+        int customer_id = rentalContract.getCustomer_id();
+        int car_id = rentalContract.getCar_id();
+
+        String start_time_str2 = String.valueOf(start_time);
+        String end_time_str2 = String.valueOf(end_time);
+
+        LocalDateTime old_start_time = oldRentalContract.getRental_start();
+        LocalDateTime old_end_time = oldRentalContract.getRental_end();
+        double old_max_km = oldRentalContract.getMax_km();
+        int old_customer_id = oldRentalContract.getCustomer_id();
+        int old_car_id = oldRentalContract.getCar_id();
+
+
+
+        int result = -1;
+
+        PreparedStatement preparedStatement;
+        String updateStr = "UPDATE rental_contracts SET start_time = ?, end_time = ?, max_km = ?," +
+                " customer_id = ?, car_id = ?" +
+                " WHERE rental_contract_id = ?";
+
+
+        while (rentalContract.getRental_end().isBefore(rentalContract.getRental_start())) { // Hvis end_time er tidligere end start og omvendt
+            System.out.println("the new end_time is before start_time. Please enter new end_time: ");
+            System.out.println(rentalContract.getRental_start() + "  første  " + rentalContract.getRental_end());
+            end_time_str2 = reader.readChoiceString();
+            end_time = LocalDateTime.parse(end_time_str2,formatter);
+            rentalContract.setRental_end(end_time);
+            System.out.println(rentalContract.getRental_start() + "  anden  " + rentalContract.getRental_end());
+        }
+
+        if (old_customer_id != customer_id || old_car_id != car_id) {
+
+            //TILFÆLDE 1 :Kun kunde_id ændret, IKKE bilen.
+            if (old_customer_id != customer_id && old_car_id == car_id) {
+                int customerControl = checkCustomerExists(customer_id);
+                int counter = 0; // kontrol at kunden findes.
+                while (customerControl == 0) {
+                    System.out.println("It looks like you are trying to assign a user that does not exist. Please enter a valid ID");
+
+                    int new_customer_id = reader.readChoiceInt();
+                    rentalContract.setCustomer_id(new_customer_id);
+
+                    counter++;
+                    if (counter > 4) { // Lav ny kunde ved fejl indtast.
+                        System.out.println("It looks like you can't find the customer you are looking for.\n" +
+                                "Do you want to create a new customer?\n1 for yes, 2 for no");
+                        int choice = reader.readChoiceInt();
+                        reader.scanner.nextLine();
+                        if (choice == 1) {
+                            Customer customer = reader.createCustomer();
+                            insertCustomer(customer);
+                            rentalContract.setCustomer_id(getCustomerIdFromDB(customer.getEmail()));
+                            customerControl=checkCustomerExists(rentalContract.getCustomer_id());
+                        } else {
+                            System.out.println("Error. Contract not updated.");
+                            return -1;
+                        }
+                    }
+                }
+
+            } //TILFÆLDE 1 færdig
+            System.out.println("NÅR VI HERNED?");
+            int counter = 0;
+            boolean carCreated = false;
+
+            //TILFÆLDE 2, Vi ændrer bilen, men IKKE kunden.
+            if (old_customer_id == customer_id && old_car_id != car_id) {
+                int carControl = checkCarExists(car_id);
+                while (carControl != 1) {
+                    System.out.println("It looks like you can't find the car you are looking for.\n" +
+                            "Please enter a valid id: ");
+                    int new_car_id = reader.readChoiceInt();
+                    rentalContract.setCar_id(new_car_id);
+                    counter++;
+                    if (counter > 4) {
+                        System.out.println("It looks like you can't find the car you are looking for.\n" +
+                                "Do you want to create a new car?\n1 for yes, 2 for no");
+                        int choice2 = reader.readChoiceInt();
+                        if (choice2 == 1) {
+                            Car car = reader.createCar();
+                            insertCar(car);
+                            rentalContract.setCar_id(getLatestCarIndex());
+                            carControl=checkCarExists(rentalContract.getCar_id());
+                            carCreated = true;
+                        } else {
+                            System.out.println("Error. Contract not updated.");
+                            return -1;
+                        }
+
+                    }
+                }
+
+
+                // Kontrol af om bilen er reserveret eller fri.
+                counter = 0;
+                if (!carCreated) {
+                    int control_car_available = isCarAvailable(start_time_str2, end_time_str2, car_id);
+                    while (control_car_available > 0) {
+                        System.out.println("It looks like your car is already reserved. Please enter a different car id: ");
+                        int new_car_id = reader.readChoiceInt();
+                        rentalContract.setCar_id(new_car_id);
+                        counter++;
+
+                        if (counter > 4) {
+                            System.out.println("The cars you've requested are all reserved. Do you wish to create a new car?\n" +
+                                    "1 for yes, 2 for no");
+                            int choice3 = reader.readChoiceInt();
+                            if (choice3 == 1) {
+                                Car car = reader.createCar();
+                                insertCar(car);
+                            } else {
+                                System.out.println("Error. Contract not updated.");
+                                return -1;
+                            }
+                        }
+
+                    }
+                }
+            } // TILFÆLDE 2.  færdig
+
+            if (old_customer_id != customer_id && old_car_id != car_id){
+
+                int customerControl = checkCustomerExists(customer_id);
+                int counter1 = 0; // kontrol at kunden findes.
+                while (customerControl == 0) {
+                    System.out.println("It looks like you are trying to assign a user that does not exist. Please enter a valid ID");
+
+                    int new_customer_id = reader.readChoiceInt();
+                    rentalContract.setCustomer_id(new_customer_id);
+
+                    counter1++;
+                    if (counter1 > 4) { // Lav ny kunde ved fejl indtast.
+                        System.out.println("It looks like you can't find the customer you are looking for.\n" +
+                                "Do you want to create a new customer?\n1 for yes, 2 for no");
+                        int choice = reader.readChoiceInt();
+                        reader.scanner.nextLine();
+                        if (choice == 1) {
+                            Customer customer = reader.createCustomer();
+                            insertCustomer(customer);
+                            rentalContract.setCustomer_id(getCustomerIdFromDB(customer.getEmail()));
+                            customerControl=checkCustomerExists(rentalContract.getCustomer_id());
+                        } else {
+                            System.out.println("Error. Contract not updated.");
+                            return -1;
+                        }
+                    }
+                }  //WHILELOOP
+
+
+
+                int counter2 =0;
+                int carControl = checkCarExists(car_id);
+                while (carControl != 1) {
+                    System.out.println("It looks like you can't find the car you are looking for.\n" +
+                            "Please enter a valid id: ");
+                    int new_car_id = reader.readChoiceInt();
+                    rentalContract.setCar_id(new_car_id);
+                    counter2++;
+                    if (counter2 > 4) {
+                        System.out.println("It looks like you can't find the car you are looking for.\n" +
+                                "Do you want to create a new car?\n1 for yes, 2 for no");
+                        int choice2 = reader.readChoiceInt();
+                        reader.scanner.nextLine();
+                        if (choice2 == 1) {
+                            Car car = reader.createCar();
+                            insertCar(car);
+                            System.out.println("lastest car index  " + getLatestCarIndex());
+                            System.out.println("rentalContract car id: " + rentalContract.getCar_id());
+                            rentalContract.setCar_id(getLatestCarIndex());
+                            System.out.println("rentalContract car id efter set: " + rentalContract.getCar_id());
+                            carControl=checkCarExists(rentalContract.getCar_id());
+                            System.out.println("carcontrol " + carControl);
+                            car_id = getLatestCarIndex();
+                        } else {
+                            System.out.println("Error. Contract not updated.");
+                            return -1;
+                        }
+
+                    }
+                }
+
+
+                System.out.println(car_id + " car id.");
+                System.out.println(rentalContract.getCar_id() + " rentalcar id.");
+            }
+
+        }
+
+        System.out.println(car_id + " car id.");
+        car_id = rentalContract.getCar_id();
+        try {
+                preparedStatement = connection.prepareStatement(updateStr);
+                preparedStatement.setString(1, start_time_str2);
+                preparedStatement.setString(2, end_time_str2);
+                preparedStatement.setDouble(3, max_km);
+                preparedStatement.setInt(4, customer_id);
+                preparedStatement.setInt(5, car_id);
+                preparedStatement.setInt(6, rental_contract_id);
+                result = preparedStatement.executeUpdate();
+
+        } catch (SQLException error) {
+                error.printStackTrace();
+        }
+        System.out.println("You successfully updated a rental contract!\n");
+        return result;
+        }
+
+
+
     public RentalContract getRentalContractByRCID(int rental_contract_id){
         ArrayList<RentalContract> rentalContractList = new ArrayList<>();
         PreparedStatement preparedStatement;
@@ -1204,24 +1505,37 @@ public class JDBCWriter {
             result = rowCount;
 
         } catch (SQLException sqlerror) {
-            System.out.println("sql fejl i writeline= INSERTCUSTOMER METODE " + sqlerror.getMessage());
+            System.out.println("sql fejl i writeline= insertRental METODE " + sqlerror.getMessage());
         }
 
 
-        System.out.println("\nSuccesfully saved customer entry to DataBase\n");
+        System.out.println("\nSuccesfully saved rental entry to DataBase\n");
         return result;
 
     }
 
+    public int deleteRentalContract(int id) {
+        String deleteString = "DELETE from rental_contracts where rental_contract_id = ?";
+        PreparedStatement preparedStatement;
+        int result = -1;
+
+        try {
+            preparedStatement = connection.prepareStatement(deleteString);
+            preparedStatement.setInt(1, id);
+            result = preparedStatement.executeUpdate();
+
+        } catch (SQLException error) {
+            error.printStackTrace();
+        }
+        return result;
+    }
 
 
 
 }
 
 
-    // ---------------------------------------------------
-    // --------------------------------------------------- Y I K E S
-    // ---------------------------------------------------
+
     // ---------------------------------------------------
     // ---------------------------------------------------
     // ---------------------------------------------------

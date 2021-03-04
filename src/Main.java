@@ -1,5 +1,6 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -64,7 +65,7 @@ public class Main {
                                 scanner.nextLine();
                                 Car newCar;
                                 newCar = createCar();
-                                jdbcWriter.writeLines(newCar);
+                                jdbcWriter.insertCar(newCar);
                                 break;
                             case 2: //Delete car
                                 System.out.println("Please enter ID number of car you wish to delete: ");
@@ -99,12 +100,12 @@ public class Main {
 
                     switch (subMenuChoice) {
                         case 1: // Insert customer
-                            Customer customer=new Customer();
+                            Customer customer;
                             customer = createCustomer();
                             jdbcWriter.insertCustomer(customer);
                             break;
                         case 2: //Delete customer
-                            deleteCustomerfefe();
+                            deleteCustomer();
                             break;
                         case 3: //Update customer
                             updateCustomer();
@@ -130,16 +131,17 @@ public class Main {
 
                     switch(subMenuChoice){
                         case 1: // Insert
-
-                            //jdbcWriter.insertRentalContract();
+                            RentalContract rentalContract;
+                            rentalContract = createRentalContract();
+                            jdbcWriter.insertRentalContract(rentalContract);
                             break;
                         case 2: // Delete
-
+                            deleteRentalContract();
                             break;
                         case 3: // Update
-
+                            updateRentalContract();
                             break;
-                        case 4: // hjælp
+                        case 4:
 
                             break;
 
@@ -160,22 +162,25 @@ public class Main {
 
 
     public RentalContract createRentalContract() {
-        RentalContract rentalContract = new RentalContract(); // fix me
+        RentalContract rentalContract; // fix me
         LocalDateTime start_time;
+        String start_timestr;
+        String end_timestr;
         LocalDateTime end_time;
         double max_km;
         int customer_id;
         int car_id;
 
-        //Contact
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
         System.out.println("Enter start_time: ");
-        start_time = LocalDateTime.parse(readChoiceString());
+        start_timestr = readChoiceString();
+        start_time = LocalDateTime.parse(start_timestr,formatter);
         System.out.println("Enter expected end_time: ");
-        end_time = LocalDateTime.parse(readChoiceString());
+        end_timestr = readChoiceString();
+        end_time = LocalDateTime.parse(end_timestr,formatter);
         System.out.println("Enter max km: ");
         max_km = readChoiceDouble();
-
-        //Address
         System.out.println("Enter customer_id: ");
         customer_id = readChoiceInt();
         System.out.println("Enter car_id: ");
@@ -183,10 +188,151 @@ public class Main {
         scanner.nextLine(); // scannerbug
 
 
+        int counter=0;
+        int test = jdbcWriter.isCarAvailable(start_timestr,end_timestr,car_id);
+        System.out.println(test + " se mig se mig");
+        while (test >0){ //Kontrollerer at bilen ikke er reserveret.
+            System.out.println("Car is already reserved for this time period. Please enter a new car id: ");
+            car_id=readChoiceInt();
+            counter++;
+            if (counter>5) {
+                System.out.println("It looks like you can't get any of the cars you want. Do you want to create a new car? " +
+                        "1 for yes, 2 for no.");
+                int yesOrNo = readChoiceInt();
+                scanner.nextLine(); //scannerbug
+
+                if (yesOrNo==1) {
+                    Car car = createCar();
+                    jdbcWriter.insertCar(car);
+                    car_id = jdbcWriter.getLatestCarIndex();
+                    test=0;
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        if (jdbcWriter.checkCustomerExists(customer_id) != 1) { //Kontrol af kunden findes
+            System.out.println("It looks like the customer doesn't exist.. Do you wish to create the customer?" +
+                    " 1 for yes, 2 for no.");
+            int yesOrNo = readChoiceInt();
+            scanner.nextLine(); //scannerbug
+            if (yesOrNo==1) {
+                Customer newCustomer = createCustomer();
+                jdbcWriter.insertCustomer(newCustomer);
+                customer_id = jdbcWriter.getCustomerIdFromDB(newCustomer.getEmail());
+
+            } else {
+                return null;
+            }
+        }//checkCustomerExists
+
+        if(jdbcWriter.checkCarExists(car_id) != 1){ //Kontrol af bilen findes
+            System.out.println("It looks like the car doesn't exist.. Do you wish to create a new car? " +
+                    "1 for yes, 2 for no.");
+            int yesOrNo = readChoiceInt();
+            scanner.nextLine(); //scannerbug
+
+            if (yesOrNo==1) {
+                Car car = createCar();
+                jdbcWriter.insertCar(car);
+                car_id = jdbcWriter.getLatestCarIndex();
+
+            } else {
+                return null;
+            }
+        }
+
+        rentalContract = new RentalContract(start_time,end_time,max_km,customer_id,car_id);
 
     return rentalContract;
     }
 
+    public void deleteRentalContract() {
+
+        System.out.println("Please enter ID number of rental contract you wish to delete: ");
+        int rental_id = readChoiceInt();
+        RentalContract rentalContract = jdbcWriter.getRentalContractByRCID(rental_id);
+        int customer_id = rentalContract.getCustomer_id();
+
+        jdbcWriter.deleteRentalContract(rental_id);
+
+        System.out.println("Successfully deleted the rental contract with contract_id: "+rental_id+
+                "\nassociated with customer_id: "+customer_id);
+
+    }
+
+    public void updateRentalContract() {
+        System.out.println("Please enter ID of the rental contract you wish to update");
+        int rental_contract_id = readChoiceInt();
+        RentalContract rentalContract = jdbcWriter.getRentalContractByRCID(rental_contract_id);
+        RentalContract oldRentalContract = jdbcWriter.getRentalContractByRCID(rental_contract_id);
+
+
+        String[] rcItems = new String[5];
+
+        rcItems[0] = rentalContract.getRental_start()+ ": current rental start_time";
+        rcItems[1] = rentalContract.getRental_end() + ": current rental end_time";
+        rcItems[2] = rentalContract.getMax_km() + ": current max km";
+        rcItems[3] = rentalContract.getCustomer_id() + ": current customer ID";
+        rcItems[4] = rentalContract.getCar_id() + ": current car ID";
+
+        MainMenu updateRentalContractMenu = new MainMenu("Update Rental Contract Menu", rcItems, "Enter menu number");
+
+        boolean run = true;
+
+
+        while (run) {
+
+            updateRentalContractMenu.displayMenu();
+            int rentalContractsMenuChoice = readChoiceInt();
+            scanner.nextLine();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+
+            switch (rentalContractsMenuChoice) {
+                case 1:
+                    System.out.println("Enter new start_time: ");
+                    String new_start_time_str = readChoiceString();
+                    LocalDateTime new_start_time = LocalDateTime.parse(new_start_time_str,formatter);
+                    rentalContract.setRental_start(new_start_time);
+                    rcItems[0] = rentalContract.getRental_start() + ": current start_time";
+                    break;
+                case 2:
+                    System.out.println("Enter new end_time: ");
+                    String new_end_time_str = readChoiceString();
+                    LocalDateTime new_end_time = LocalDateTime.parse(new_end_time_str,formatter);
+                    rentalContract.setRental_start(new_end_time);
+                    rcItems[1] = rentalContract.getRental_end() + ": current end_time";
+                    break;
+                case 3:
+                    System.out.println("Enter new max_km: ");
+                    double new_max_km = readChoiceDouble();
+                    rentalContract.setMax_km(new_max_km);
+                    rcItems[2] = rentalContract.getMax_km() + ": current max_km";
+                    break;
+                case 4:
+                    System.out.println("Enter new customer ID: ");
+                    int new_customer_id = readChoiceInt();
+                    rentalContract.setCustomer_id(new_customer_id);
+                    rcItems[3] = rentalContract.getCustomer_id() + ": current customer ID";
+                    break;
+                case 5:
+                    System.out.println("Enter new car ID: ");
+                    int new_car_id = readChoiceInt();
+                    rentalContract.setCar_id(new_car_id);
+                    rcItems[4] = rentalContract.getCar_id() + ": current car ID";
+                    break;
+                case 6:
+                    jdbcWriter.updateRentalContract(rental_contract_id,rentalContract,oldRentalContract);
+                    run = false;
+                    break;
+
+            }
+
+        }
+
+    }
 
     public int readChoiceInt() {
         int userChoice;
@@ -386,7 +532,7 @@ public class Main {
         return customer;
     }
 
-    public void deleteCustomerfefe() {
+    public void deleteCustomer() {
 
         System.out.println("Please enter ID number of customer you wish to delete: ");
         int customer_id = readChoiceInt();
