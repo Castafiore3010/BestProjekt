@@ -3,6 +3,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.io.*;
+
+
 
 public class Main {
     public static Scanner scanner = new Scanner(System.in);
@@ -41,11 +44,23 @@ public class Main {
             switch (choice) {
 
                 case 1: // Connect to db
-                    boolean b = jdbcWriter.setConnection();
-                    menu.setMenuItems(new String[]{"Cars", "Customers", "Rentals"});
-                    menu.setExitNumber(menu.getExitNumber() - 1);
-                    connectedToDB = true;
-                    cars = jdbcWriter.getCarsFromDatabase();
+                    System.out.println("Please enter username");
+                    String username = readChoiceString();
+                    System.out.println("Please enter password");
+                    String password = readChoiceString();
+
+
+                    boolean b = jdbcWriter.setConnection(username, password);
+
+
+                    if  (b) {
+                        menu.setMenuItems(new String[]{"Cars", "Customers", "Rentals"});
+                        menu.setExitNumber(menu.getExitNumber() - 1);
+                        connectedToDB = true;
+                        cars = jdbcWriter.getCarsFromDatabase();
+                    } else {
+                        System.out.println("Access denied");
+                    }
                     if (b)
                         System.out.println("Connection made\n");
                     else
@@ -92,72 +107,74 @@ public class Main {
                     break;
                 case 3: // Customers submenu
                     while (subMenuCustomerRun){
-                    MainMenu subMenuCustomers = new MainMenu("Customers -- Exit returns to main menu",
-                            subMenuItemsCustomer,"Enter menu number");
-                    subMenuCustomers.displayMenu();
-                    subMenuChoice = subMenuCustomers.readMenuChoice();
+                        MainMenu subMenuCustomers = new MainMenu("Customers -- Exit returns to main menu",
+                                subMenuItemsCustomer,"Enter menu number");
+                        subMenuCustomers.displayMenu();
+                        subMenuChoice = subMenuCustomers.readMenuChoice();
 
 
-                    switch (subMenuChoice) {
-                        case 1: // Insert customer
-                            Customer customer;
-                            customer = createCustomer();
-                            jdbcWriter.insertCustomer(customer);
-                            break;
-                        case 2: //Delete customer
-                            deleteCustomer();
-                            break;
-                        case 3: //Update customer
-                            updateCustomer();
-                            break;
-                        case 4:
-                            subMenuCarsRun = false;
-                            break;
-                    }
+                        switch (subMenuChoice) {
+                            case 1: // Insert customer
+                                Customer customer;
+                                customer = createCustomer();
+                                jdbcWriter.insertCustomer(customer);
+                                break;
+                            case 2: //Delete customer
+                                deleteCustomer();
+                                break;
+                            case 3: //Update customer
+                                updateCustomer();
+                                break;
+                            case 4:
+                                subMenuCustomerRun = false;
+                                break;
+                        }
 
-                    if (subMenuChoice != 4) {
-                        System.out.print("\nEnter r to return: ");
-                        scanner.next();
-                    }
+                        if (subMenuChoice != 4) {
+                            System.out.print("\nEnter r to return: ");
+                            scanner.next();
+                        }
                     } // while loop
                     break;
 
                 case 4: // RentalContract submenu
-                    MainMenu subMenuRentalContracts = new MainMenu("Rental Contracts -- Exit returns to main menu",
-                            subMenuItemsRC,"Enter menu number");
-                    subMenuRentalContracts.displayMenu();
-                    subMenuChoice = subMenuRentalContracts.readMenuChoice();
+                    while (subMenuRentalContractsRun) {
+
+                        MainMenu subMenuRentalContracts = new MainMenu("Rental Contracts -- Exit returns to main menu",
+                                subMenuItemsRC,"Enter menu number");
+                        subMenuRentalContracts.displayMenu();
+                        subMenuChoice = subMenuRentalContracts.readMenuChoice();
 
 
-                    switch(subMenuChoice){
-                        case 1: // Insert
-                            RentalContract rentalContract;
-                            rentalContract = createRentalContract();
-                            jdbcWriter.insertRentalContract(rentalContract);
-                            break;
-                        case 2: // Delete
-                            deleteRentalContract();
-                            break;
-                        case 3: // Update
-                            updateRentalContract();
-                            break;
-                        case 4:
+                        switch(subMenuChoice) {
+                            case 1: // Insert
+                                RentalContract rentalContract;
+                                rentalContract = createRentalContract();
+                                jdbcWriter.insertRentalContract(rentalContract);
+                                break;
+                            case 2: // Delete
+                                deleteRentalContract();
+                                break;
+                            case 3: // Update
+                                updateRentalContract();
+                                break;
+                            case 4:
+                                subMenuRentalContractsRun = false;
+                                break;
+                        }
 
-                            break;
-
+                        if (subMenuChoice != 4) {
+                            System.out.print("\nEnter r to return: ");
+                            scanner.next();
+                        }
                     }
-
                     break;
                 case 5:
                     System.out.println("Thank you for using kailua database management app");
                     run = false;
                     break;
-
             }
-
         }
-
-
     }
 
 
@@ -245,7 +262,7 @@ public class Main {
 
         rentalContract = new RentalContract(start_time,end_time,max_km,customer_id,car_id);
 
-    return rentalContract;
+        return rentalContract;
     }
 
     public void deleteRentalContract() {

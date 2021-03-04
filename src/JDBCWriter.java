@@ -10,12 +10,12 @@ public class JDBCWriter {
     static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 
-    public boolean setConnection() {
+    public boolean setConnection(String username, String password) {
         final String url = "jdbc:mysql://127.0.0.1:3306/kailuacarrental?serverTimezone=UTC";
         boolean bres = false;
 
         try {
-            connection = DriverManager.getConnection(url, "Marc", "wilma");
+            connection = DriverManager.getConnection(url, username, password);
             bres = true;
         } catch (SQLException error) {
             System.out.println("\nNo connection made");
